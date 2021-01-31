@@ -110,13 +110,9 @@
         <el-col :sm="12" :xs="24">
           <!--人员类别 -->
           <el-form-item label="人员类别:" prop="personnelType">
-            <el-input
-              placeholder="请输入人员类别"
-              style="width: 92%"
-              v-model="summaryData.personnelType"
-              clearable
-            >
-            </el-input>
+            <el-select style="width:92%"  placeholder="请输入人员类别" v-model="summaryData.personnelType.key" value>
+              <el-option :key="index" :label="item" :value="key" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :sm="12" :xs="24">
@@ -348,12 +344,17 @@
           },
           sex:{
             code:'',
-
+          },
+          personnelType:{
+            key:'',
           },
           isDelete: 0,
         },
         filed:[],
         stationList:[],
+        dicts:{
+          PERSONNEL_TYPE:{}
+        },
         screenWidth: 0,
         width: this.initWidth(),
         rules: {
@@ -398,57 +399,46 @@
             message: this.$t("rules.require"),
             trigger: "blur",
           },
-          personnelType:{
+          idNumber:[{
             required: true,
             message: this.$t("rules.require"),
             trigger: "blur",
-          },
-          idNumber:{
-            required: true,
-            message: this.$t("rules.require"),
+          },{
+            validator: (rule, value, callback) => {
+              let reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+              console.log(reg.test(value));
+              if (reg.test(value)) {
+                callback();
+              } else {
+                callback('请输入正确的身份证号码');
+              }
+            },
             trigger: "blur",
-          },
+          }
+          ],
           homeAddress:{
             required: true,
             message: this.$t("rules.require"),
             trigger: "blur",
           },
-          marriage:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "change",
-          },
-          secondmentType:{
+          phone:[{
             required: true,
             message: this.$t("rules.require"),
             trigger: "blur",
-          },
-          inoculateType:{
-            required: true,
-            message: this.$t("rules.require"),
+          },{
+            validator: (rule, value, callback) => {
+              let reg = /^[1][3,4,5,6,7,8,9][0-9]{9}$/;
+              console.log(reg.test(value));
+              if (reg.test(value)) {
+                callback();
+              } else {
+                callback('请输入正确的手机号码');
+              }
+            },
             trigger: "blur",
-          },
-          phone:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "blur",
-          },
-          specimenNumber:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "blur",
-          },
-          personnelStatus:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "blur",
-          },
-          checkType:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "blur",
-          },
-          personalSignature:{
+          }
+          ],
+          personnelType:{
             required: true,
             message: this.$t("rules.require"),
             trigger: "blur",
@@ -486,12 +476,9 @@
         this.summaryData.departMent.key = val.length>0?val[1]:'';
         this.summaryData.post.key = '';
         if (val.length > 0 ){
-          stationApi.page({
-            size: 10000,
-            model:{ orgId: { key: val[1]?val[1]:val[0]?val[0]:''}, status: true }
-          }).then(response => {
+          stationApi.findStaByIds(val[1]?val[1]:val[0]?val[0]:'').then(response => {
             const res = response.data;
-            this.stationList = res.data.records;
+            this.stationList = res.data;
           });
         }else {
           this.stationList = [];
@@ -507,11 +494,12 @@
           return "800px";
         }
       },
-      setUser(org ,list,orgID) {
+      setUser(org ,list,orgID,dicts) {
         this.orgList = list;
         if (org) {
           this.summaryData = { ...org };
         }
+        this.dicts = { ...dicts };
         // this.taskData.orgId = val;
         this.summaryData.orgId = orgID;
       },
@@ -569,7 +557,12 @@
         });
       },
       update() {
-        taskApi.update(this.taskData).then((response) => {
+        let data = JSON.parse(JSON.stringify(this.summaryData));
+        delete data.filed;
+        data.specimenNumber = Number(data.specimenNumber);
+        data.serialNumber = Number(data.serialNumber);
+        data.accountingTestTaskId = this.$route.query.id;
+        taskApi.update(data).then((response) => {
           const res = response.data;
           if (res.isSuccess) {
             this.isVisible = false;

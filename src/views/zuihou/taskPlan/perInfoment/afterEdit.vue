@@ -109,14 +109,10 @@
       <el-row>
         <el-col :sm="12" :xs="24">
           <!--人员类别 -->
-          <el-form-item label="人员类别:" prop="personnelType">
-            <el-input
-              placeholder="请输入人员类别"
-              style="width: 92%"
-              v-model="summaryData.personnelType"
-              clearable
-            >
-            </el-input>
+          <el-form-item label="人员类别:" prop="personnelType.key">
+            <el-select style="width:92%"  placeholder="请输入人员类别" v-model="summaryData.personnelType.key" value>
+              <el-option :key="index" :label="item" :value="key" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :sm="12" :xs="24">
@@ -265,11 +261,68 @@
       </el-row>
       <el-row>
         <el-col :sm="12" :xs="24">
+          <!--检测时间 -->
+          <el-form-item label="检测时间:" prop="checkTime">
+            <el-input
+              placeholder="请输入检测时间"
+              style="width: 92%"
+              v-model="summaryData.checkTime"
+              clearable
+            >
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :sm="12" :xs="24">
+          <!--检测结果 -->
+          <el-form-item label="检测结果:" prop="checkResult">
+            <el-input
+              placeholder="请输入检测结果"
+              style="width: 92%"
+              v-model="summaryData.checkResult"
+              clearable
+            >
+            </el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :sm="12" :xs="24">
+          <!--是否异常 -->
+            <el-form-item label="是否异常:" prop="isAbnormal">
+              <el-select style="width: 92%" clearable v-model="summaryData.isAbnormal.key" placeholder="请选择检测是否异常">
+                <el-option
+                  v-for="item in isAbnormalList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+        </el-col>
+        <el-col :sm="12" :xs="24">
+          <!--未检测原因 -->
+          <el-form-item label="未检测原因:" prop="notDetectedReason">
+            <el-input
+              placeholder="请输入未检测原因"
+              style="width: 92%"
+              type="textarea"
+              :rows="3"
+              v-model="summaryData.notDetectedReason"
+              clearable
+            >
+            </el-input>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :sm="12" :xs="24">
           <!--检测地址 -->
           <el-form-item label="检测地址:" prop="checkAddress">
             <el-input
               placeholder="请输入检测地址"
               style="width: 92%"
+              type="textarea"
+              :rows="3"
               v-model="summaryData.checkAddress"
               clearable
             >
@@ -290,7 +343,20 @@
             </el-input>
           </el-form-item>
         </el-col>
-
+      </el-row>
+      <el-row>
+        <el-col :sm="12" :xs="24">
+          <!--结果证明 -->
+          <el-form-item label="结果证明:" prop="checkAddress">
+            <el-input
+              placeholder="请输入检测地址"
+              style="width: 92%"
+              v-model="summaryData.checkAddress"
+              clearable
+            >
+            </el-input>
+          </el-form-item>
+        </el-col>
       </el-row>
     </el-form>
     <div class="dialog-footer" slot="footer">
@@ -330,6 +396,10 @@
           {value:true,label:'是'},
           {value:false,label:'否'},
         ],
+        isAbnormalList:[
+          {value:'0',label:'否'},
+          {value:'1',label:'是'},
+        ],
         summaryData: {
           filed:[],
           orgId:'',
@@ -343,14 +413,23 @@
             key:'',
             data:{}
           },
+          personnelType:{
+            key:'',
+            data:'',
+          },
           post:{
             key:''
           },
           sex:{
             code:'',
-
+          },
+          isAbnormal:{
+            keyp:'',
           },
           isDelete: 0,
+        },
+        dicts:{
+          PERSONNEL_TYPE:{}
         },
         filed:[],
         stationList:[],
@@ -383,6 +462,23 @@
               trigger: "blur",
             },
           ],
+          idNumber:[{
+            required: true,
+            message: this.$t("rules.require"),
+            trigger: "blur",
+          },{
+            validator: (rule, value, callback) => {
+              let reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+              console.log(reg.test(value));
+              if (reg.test(value)) {
+                callback();
+              } else {
+                callback('请输入正确的身份证号码');
+              }
+            },
+            trigger: "blur",
+          }
+          ],
           userName:{
             required: true,
             message: this.$t("rules.require"),
@@ -398,12 +494,7 @@
             message: this.$t("rules.require"),
             trigger: "blur",
           },
-          personnelType:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "blur",
-          },
-          idNumber:{
+          idCard:{
             required: true,
             message: this.$t("rules.require"),
             trigger: "blur",
@@ -413,42 +504,12 @@
             message: this.$t("rules.require"),
             trigger: "blur",
           },
-          marriage:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "change",
-          },
-          secondmentType:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "blur",
-          },
-          inoculateType:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "blur",
-          },
           phone:{
             required: true,
             message: this.$t("rules.require"),
             trigger: "blur",
           },
-          specimenNumber:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "blur",
-          },
-          personnelStatus:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "blur",
-          },
-          checkType:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "blur",
-          },
-          personalSignature:{
+          'personnelType.key':{
             required: true,
             message: this.$t("rules.require"),
             trigger: "blur",
@@ -486,12 +547,9 @@
         this.summaryData.departMent.key = val.length>0?val[1]:'';
         this.summaryData.post.key = '';
         if (val.length > 0 ){
-          stationApi.page({
-            size: 10000,
-            model:{ orgId: { key: val[1]?val[1]:val[0]?val[0]:''}, status: true }
-          }).then(response => {
+          stationApi.findStaByIds(val[1]?val[1]:val[0]?val[0]:'').then(response => {
             const res = response.data;
-            this.stationList = res.data.records;
+            this.stationList = res.data;
           });
         }else {
           this.stationList = [];
@@ -507,11 +565,12 @@
           return "800px";
         }
       },
-      setUser(org ,list,orgID) {
+      setUser(org ,list,orgID,dicts) {
         this.orgList = list;
         if (org) {
           this.summaryData = { ...org };
         }
+        this.dicts = { ...dicts };
         // this.taskData.orgId = val;
         this.summaryData.orgId = orgID;
       },

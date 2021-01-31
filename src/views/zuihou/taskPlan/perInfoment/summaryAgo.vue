@@ -1,9 +1,48 @@
 <template>
 <div>
-    <el-input placeholder='请选择单位' class="filter-item search-item" v-model="queryParams.model.serialNumber"/>
-    <el-input placeholder='请选择部门' class="filter-item search-item" v-model="queryParams.model.serialNumber"/>
-    <el-input placeholder='请选择职务' class="filter-item search-item" v-model="queryParams.model.serialNumber"/>
-    <el-input placeholder='请选择姓名' class="filter-item search-item" v-model="queryParams.model.serialNumber"/>
+    <el-cascader
+      class="filter-item search-item"
+      :props="{ value: 'id' }"
+      :options="orgList"
+      placeholder="请选择单位部门"
+      :show-all-levels="false"
+      v-model="queryParams.model.filed"
+      clearable
+    ></el-cascader>
+    <el-select
+      :multiple="false"
+      clearable
+      class="filter-item search-item"
+      placeholder="请选择职务"
+      v-model="queryParams.model.post.key"
+    >
+      <el-option
+        :key="item.id"
+        :label="item.name"
+        :value="item.id"
+        v-for="item in stationList"
+      />
+    </el-select>
+    <el-input placeholder='请输入姓名' class="filter-item search-item" v-model="queryParams.model.userName"/>
+    <el-select class="filter-item search-item" placeholder="请输入人员类别" v-model="queryParams.model.personnelType.key" value>
+      <el-option :key="index" :label="item" :value="key" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
+    </el-select>
+    <div style="display: inline" v-show = 'seniorHidden'>
+      <el-select class="filter-item search-item" clearable v-model="queryParams.model.sex.code" placeholder="请选择性别">
+        <el-option
+          v-for="item in genderData"
+          :key="item.code"
+          :label="item.label"
+          :value="item.code">
+        </el-option>
+      </el-select>
+      <el-input placeholder='请输入身份证号' class="filter-item search-item" v-model="queryParams.model.idNumber"/>
+      <el-input placeholder='请输入借调类型' class="filter-item search-item" v-model="queryParams.model.secondmentType"/>
+      <el-input placeholder='请输入疫苗接种类别' class="filter-item search-item" v-model="queryParams.model.inoculateType"/>
+      <el-input placeholder='请输入联系电话' class="filter-item search-item" v-model="queryParams.model.phone"/>
+      <el-input placeholder='请输入标本编号' class="filter-item search-item" v-model="queryParams.model.specimenNumber"/>
+      <el-input placeholder='请输入检测类型' class="filter-item search-item" v-model="queryParams.model.checkType"/>
+    </div>
     <el-button @click="search" class="filter-item" plain type="primary">
       {{ $t("table.search") }}
     </el-button>
@@ -26,23 +65,26 @@
         <i class="el-icon-arrow-down el-icon--right"/>
       </el-button>
       <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item @click.native="batchDelete" v-has-permission="['user:delete']">
+        <el-dropdown-item @click.native="exportExcel" v-has-permission="['user:delete']">
           导出
         </el-dropdown-item>
-        <el-dropdown-item @click.native="exportExcel" v-has-permission="['user:export']">
+        <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:delete']">
+          导出预览
+        </el-dropdown-item>
+        <el-dropdown-item @click.native="addExcel" v-has-permission="['user:export']">
           新增
         </el-dropdown-item>
-        <el-dropdown-item @click.native="exportExcelPreview" v-has-permission="['user:export']">
+        <el-dropdown-item @click.native="updateExcel" v-has-permission="['user:export']">
           更新
         </el-dropdown-item>
-        <el-dropdown-item @click.native="importExcel" v-has-permission="['user:import']">
+        <el-dropdown-item @click.native="stencilExcel" v-has-permission="['user:import']">
           模板下载
         </el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
-    <el-button type="primary" plain class="filter-item" icon="el-icon-search">高级搜索</el-button>
+    <el-button type="primary" @click="seniorSearch()" plain class="filter-item" icon="el-icon-search">高级搜索</el-button>
   <el-table
-    :data="tabList"
+    :data="tableData.records"
     :key="tableKey"
     border fit row-key="id"
     ref="table"
@@ -64,7 +106,7 @@
       prop="company"
     >
       <template slot-scope="scope">
-        <span>{{ scope.row.company.data?scope.row.company.data.label:'' }}</span>
+        <span>{{ scope.row.company.data?scope.row.company.data:'' }}</span>
       </template>
     </el-table-column>
     <el-table-column
@@ -75,14 +117,14 @@
       prop="departMent"
     >
       <template slot-scope="scope">
-        <span>{{ scope.row.departMent.data?scope.row.departMent.data.label:'' }}</span>
+        <span>{{ scope.row.departMent.data?scope.row.departMent.data:'' }}</span>
       </template>
     </el-table-column>
     <el-table-column
       label="职务"
       :show-overflow-tooltip="true"
       align="center"
-      width="80"
+      width="120"
       prop="post"
     >
       <template slot-scope="scope">
@@ -122,14 +164,14 @@
         <span>{{ scope.row.dateOfBirth }}</span>
       </template>
     </el-table-column>
-    <el-table-column
-      label="人员类别"
-      :show-overflow-tooltip="true"
-      align="center"
-      width="120"
-      prop="personnelType"
-    >
-    </el-table-column>
+<!--    <el-table-column-->
+<!--      label="人员类别"-->
+<!--      :show-overflow-tooltip="true"-->
+<!--      align="center"-->
+<!--      width="120"-->
+<!--      prop="personnelType"-->
+<!--    >-->
+<!--    </el-table-column>-->
     <el-table-column
       label="身份证号"
       :show-overflow-tooltip="true"
@@ -246,7 +288,7 @@
   <pagination
     :limit.sync="queryParams.size"
     :page.sync="queryParams.current"
-    :total="6"
+    :total="(Number(tableData.total))"
     @pagination="fetch"
     v-show="tableData.total > 0"
   />
@@ -257,6 +299,20 @@
     @success="editSuccess"
     ref="edit"
   />
+  <el-dialog
+    :close-on-click-modal="false"
+    :close-on-press-escape="true"
+    title="预览"
+    width="80%"
+    class="dialo_scroll"
+    top="50px"
+    :visible.sync="preview.isVisible"
+    v-el-drag-dialog
+  >
+    <el-scrollbar>
+      <div v-html="preview.context"></div>
+    </el-scrollbar>
+  </el-dialog>
 </div>
 </template>
 
@@ -264,11 +320,14 @@
   import Edit from "./agoEdit";
   import orgApi from '@/api/Org.js'
   import perInforApi from "@/api/perInfor.js";
-  import { initQueryParams } from '@/utils/commons';
+  import { initQueryParams,downloadFile ,initDicts} from '@/utils/commons';
   import Pagination from "@/components/Pagination";
+  import stationApi from "@/api/Station.js";
+  import elDragDialog from '@/directive/el-drag-dialog';
     export default {
         name: "summaryAgo.vue",
       components:{Edit,Pagination},
+      directives: { elDragDialog },
       data(){
         return{
           tableKey: 0,
@@ -278,408 +337,58 @@
           },
           orgList:[],
           queryParams:initQueryParams({
-
+              model:{
+                "accountingTestTaskId": this.$route.query.id,
+                "company": {
+                  "data": "",
+                  "key": ''
+                },
+                "departMent": {
+                  "data": "",
+                  "key": ''
+                },
+                personnelType:{
+                  key:''
+                },
+                "isDelete": true,
+                "post": {
+                  "data": "",
+                  "key": ''
+                },
+                "sex": {
+                  "code": "",
+                  "desc": ""
+                },
+                "status": true,
+                filed:[],
+              }
           }),
-          tabList:[
-            {"accountingTestTaskId": 0,
-              "beforeCompany": "",
-              "checkAddress": "天津市河西区",
-              "checkType": "鼻拭子",
-              "company": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "河西区警署大队",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "dateOfBirth": "19840306",
-              "departMent": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "河西分区",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "homeAddress": "河西区四信公寓",
-              "idNumber": "412726198403060562",
-              "image": "",
-              "inoculateType": "初次疫苗",
-              "isDelete": true,
-              "marriage": true,
-              "orgId": "",
-              "personalSignature": "李超",
-              "personnelStatus": "无异状",
-              "personnelType": "技术人员",
-              "phone": "13592251259",
-              "post": {
-                "data": "UI设计师",
-                "key": 0
-              },
-              "reason": "",
-              "remarks": "",
-              "secondmentType": "无",
-              "serialNumber": 10026,
-              "sex": {
-                "code": "W",
-                "desc": "男"
-              },
-              "specimenNumber": 0,
-              "status": true,
-              "userName": "李超"},
-            {"accountingTestTaskId": 0,
-              "beforeCompany": "",
-              "checkAddress": "天津市河东区",
-              "checkType": "咽拭子",
-              "company": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "河东区警署大队",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "dateOfBirth": "19740514",
-              "departMent": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "河东分区",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "homeAddress": "河西东区张亮麻辣烫",
-              "idNumber": "412726198403060562",
-              "image": "",
-              "inoculateType": "无疫苗",
-              "isDelete": true,
-              "marriage": true,
-              "orgId": "",
-              "personalSignature": "王迪",
-              "personnelStatus": "无异状",
-              "personnelType": "幼儿教师",
-              "phone": "15912567845",
-              "post": {
-                "data": "幼儿教师",
-                "key": 0
-              },
-              "reason": "",
-              "remarks": "",
-              "secondmentType": "无",
-              "serialNumber": 10027,
-              "sex": {
-                "code": "W",
-                "desc": "男"
-              },
-              "specimenNumber": 123666,
-              "status": true,
-              "userName": "李超"},
-            {"accountingTestTaskId": 0,
-              "beforeCompany": "",
-              "checkAddress": "天津市滨海新区",
-              "checkType": "鼻拭子",
-              "company": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "滨海新区警署大队",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "dateOfBirth": "19981103",
-              "departMent": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "滨海新区分区",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "homeAddress": "滨海新区宜家公寓",
-              "idNumber": "412726199811030562",
-              "image": "",
-              "inoculateType": "无疫苗",
-              "isDelete": true,
-              "marriage": true,
-              "orgId": "",
-              "personalSignature": "张东",
-              "personnelStatus": "无异状",
-              "personnelType": "医护人员",
-              "phone": "13592251259",
-              "post": {
-                "data": "主任",
-                "key": 0
-              },
-              "reason": "",
-              "remarks": "",
-              "secondmentType": "无",
-              "serialNumber": 10026,
-              "sex": {
-                "code": "W",
-                "desc": "男"
-              },
-              "specimenNumber": 0,
-              "status": true,
-              "userName": "张东"},
-            {"accountingTestTaskId": 0,
-              "beforeCompany": "",
-              "checkAddress": "天津市南开区",
-              "checkType": "鼻拭子",
-              "company": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "南开区警署大队",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "dateOfBirth": "19971013",
-              "departMent": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "南开区分区",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "homeAddress": "南开区天方小区",
-              "idNumber": "412726199811030562",
-              "image": "",
-              "inoculateType": "无疫苗",
-              "isDelete": true,
-              "marriage": true,
-              "orgId": "",
-              "personalSignature": "张冬冬",
-              "personnelStatus": "无异状",
-              "personnelType": "医护人员",
-              "phone": "13592251259",
-              "post": {
-                "data": "护士",
-                "key": 0
-              },
-              "reason": "",
-              "remarks": "",
-              "secondmentType": "无",
-              "serialNumber": 10029,
-              "sex": {
-                "code": "W",
-                "desc": "女"
-              },
-              "specimenNumber": 0,
-              "status": true,
-              "userName": "张冬冬"},
-            {"accountingTestTaskId": 0,
-              "beforeCompany": "",
-              "checkAddress": "天津市河东区",
-              "checkType": "咽拭子",
-              "company": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "河东区警署大队",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "dateOfBirth": "19740514",
-              "departMent": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "河东分区",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "homeAddress": "河西东区张亮麻辣烫",
-              "idNumber": "412726198403060562",
-              "image": "",
-              "inoculateType": "无疫苗",
-              "isDelete": true,
-              "marriage": true,
-              "orgId": "",
-              "personalSignature": "王迪",
-              "personnelStatus": "无异状",
-              "personnelType": "幼儿教师",
-              "phone": "15912567845",
-              "post": {
-                "data": "幼儿教师",
-                "key": 0
-              },
-              "reason": "",
-              "remarks": "",
-              "secondmentType": "无",
-              "serialNumber": 10027,
-              "sex": {
-                "code": "W",
-                "desc": "男"
-              },
-              "specimenNumber": 123666,
-              "status": true,
-              "userName": "李超"},
-            {"accountingTestTaskId": 0,
-              "beforeCompany": "",
-              "checkAddress": "天津市南开区",
-              "checkType": "鼻拭子",
-              "company": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "南开区警署大队",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "dateOfBirth": "19971013",
-              "departMent": {
-                "data": {
-                  "abbreviation": "",
-                  "createTime": "",
-                  "createUser": 0,
-                  "describe": "",
-                  "id": 0,
-                  "label": "南开区分区",
-                  "parentId": 0,
-                  "sortValue": 0,
-                  "status": true,
-                  "treePath": "",
-                  "updateTime": "",
-                  "updateUser": 0
-                },
-                "key": 0
-              },
-              "homeAddress": "南开区天方小区",
-              "idNumber": "412726199811030562",
-              "image": "",
-              "inoculateType": "无疫苗",
-              "isDelete": true,
-              "marriage": true,
-              "orgId": "",
-              "personalSignature": "张冬冬",
-              "personnelStatus": "无异状",
-              "personnelType": "医护人员",
-              "phone": "13592251259",
-              "post": {
-                "data": "护士",
-                "key": 0
-              },
-              "reason": "",
-              "remarks": "",
-              "secondmentType": "无",
-              "serialNumber": 10029,
-              "sex": {
-                "code": "W",
-                "desc": "女"
-              },
-              "specimenNumber": 0,
-              "status": true,
-              "userName": "张冬冬"},
+          genderData:[
+            {code:'M',label:'男'},
+            {code:'W',label:'女'},
           ],
+          seniorHidden:false,
+          stationList:[],
           dialog: {
             isVisible: false,
             type: "add"
           },
+          preview: {
+            isVisible: false,
+            context: ''
+          },
+          dicts:{
+            PERSONNEL_TYPE:{}
+          }
         }
       },
       mounted() {
-      this.initOrg();
+        this.initOrg();
+        this.search();
+        initDicts(['PERSONNEL_TYPE'], this.dicts);
+      },
+      watch:{
+        'queryParams.model.filed':'orgFiled'
       },
       computed: {
         user() {
@@ -691,11 +400,31 @@
             this.fetch();
         },
         fetch(){
-          perInforApi.beforPage(this.queryParams).then(response =>{
+          let data = JSON.parse(JSON.stringify(this.queryParams));
+          delete data.model.filed;
+          if (!data.model.company.key) delete data.model.company;
+          if (!data.model.departMent.key) delete data.model.departMent;
+          if (!data.model.personnelType.key) delete data.model.personnelType;
+          if (!data.model.post.key) delete data.model.post;
+          if (!data.model.sex.code) delete data.model.sex;
+          perInforApi.beforPage(data).then(response =>{
             let res = response.data;
-            console.log(res.data)
             this.tableData = res.data;
           })
+        },
+        // 监听部门单位数据变化
+        orgFiled(val){
+          this.queryParams.model.company.key = val.length>0?val[0]:'';
+          this.queryParams.model.departMent.key = val.length>0?val[1]:'';
+          this.queryParams.model.post.key = '';
+          if (val.length > 0 ){
+            stationApi.findStaByIds(val[1]?val[1]:val[0]?val[0]:'').then(response => {
+              const res = response.data;
+              this.stationList = res.data;
+            });
+          }else {
+            this.stationList = [];
+          }
         },
         initOrg() {
           orgApi.allTree({status: true})
@@ -704,6 +433,10 @@
               this.orgList = res.data
             })
         },
+        seniorSearch(){
+          if (this.seniorHidden) this.seniorHidden = false;
+          else this.seniorHidden = true;
+        },
         editClose() {
           this.dialog.isVisible = false;
         },
@@ -711,29 +444,85 @@
           this.search();
         },
         reset(){
-
+          this.queryParams.model={
+            "accountingTestTaskId": this.$route.query.id,
+            "company": {
+              "data": "",
+              "key": ''
+            },
+            "departMent": {
+              "data": "",
+              "key": ''
+            },
+            "isDelete": true,
+            "post": {
+              "data": "",
+              "key": ''
+            },
+            personnelType:{
+              key:'',
+            },
+            "sex": {
+              "code": "",
+              "desc": ""
+            },
+            "status": true,
+            filed: [],
+          }
         },
         edit(row){
           this.dialog.type = "edit";
           this.dialog.isVisible = true;
-          this.$refs.edit.setUser(row,this.orgList,this.user.orgId);
+          this.$refs.edit.setUser(row,this.orgList,this.user.orgId,this.dicts);
         },
         add(){
           this.dialog.type = "add";
           this.dialog.isVisible = true;
-          this.$refs.edit.setUser(false,this.orgList,this.user.orgId);
+          this.$refs.edit.setUser(false,this.orgList,this.user.orgId,this.dicts);
         },
-        batchDelete(){
-
-        },
+        // 导出excel
         exportExcel(){
+          if (this.queryParams.timeRange) {
+            this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
+            this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
+          }
+          perInforApi.export(this.queryParams).then(response => {
+            downloadFile(response);
+          });
+        },
+        // 导出预览
+        exportPreviewExcel(){
+          if (this.queryParams.timeRange) {
+            this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
+            this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
+          }
+          perInforApi.preview(this.queryParams).then(response => {
+            const res = response.data;
+            this.preview.isVisible = true;
+            this.preview.context = res.data;
+          });
+        },
+        // 新增表格
+        addExcel(){
 
         },
-        exportExcelPreview(){
+        // 更新表格
+        updateExcel(){
 
         },
-        importExcel(){
-
+        // 模板下载
+        stencilExcel(){
+          if (this.queryParams.timeRange) {
+            this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
+            this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
+          }
+          let dataExcel = JSON.parse(JSON.stringify(this.queryParams));
+          dataExcel.page = 0;
+          dataExcel.size = 0;
+          dataExcel.map.fileName = "人员信息汇总检测前模板下载";
+          perInforApi.export(dataExcel).then(response => {
+            downloadFile(response);
+          });
         },
         // 返回上一个页面
         returnPage() {

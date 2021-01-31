@@ -3,23 +3,23 @@ import axiosApi from './AxiosApi.js'
 const apiList = {
   export:{
     method:'POST',
-    url:`/nucleic/beforPersonnel/exportExcelReWrite`
+    url:`/nucleic/afterPersonnel/exportExcelReWrite`
   },
   import:{
     method:'POST',
-    url:`/nucleic/beforPersonnel/import`
+    url:`/nucleic/afterPersonnel/import`
   },
   preview:{
     method:'POST',
-    url:`/nucleic/beforPersonnel/previewReWiter`
+    url:`/nucleic/afterPersonnel/previewReWiter`
   },
-  beforPersonnel:{
+  afterPersonnel:{
     method:'POST',
-    url:`/nucleic/beforPersonnel`
+    url:`/nucleic/afterPersonnel`
   },
-  beforPage:{
+  afterPage:{
     method:'POST',
-    url:`/nucleic/beforPersonnel/queryPage`
+    url:`/nucleic/afterPersonnel/queryPage`
   }
 }
 
@@ -43,15 +43,15 @@ export default {
       data
     })
   },
-  beforPersonnel(data){
+  afterPersonnel(data){
     return axiosApi({
-      ...apiList.beforPersonnel,
+      ...apiList.afterPersonnel,
       data
     })
   },
-  beforPage(data){
+  afterPage(data){
     return axiosApi({
-      ...apiList.beforPage,
+      ...apiList.afterPage,
       data
     })
   }

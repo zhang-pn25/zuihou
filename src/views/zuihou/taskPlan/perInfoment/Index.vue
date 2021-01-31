@@ -30,43 +30,18 @@
     </div>
   </div>
 <div>
-  <el-button @click="DownloadExcel" class="filter-item" plain type="warning">
-    导出</el-button>
-  <el-dropdown-item @click.native="exportExcelPreview" v-has-permission="['user:export']">
-    导出预览
-  </el-dropdown-item>
-  <el-button @click="newData" class="filter-item" plain type="danger">新增</el-button>
-  <el-button @click="updateData" class="filter-item" plain type="danger">更新</el-button>
-  <el-button @click="DownloadExcel" class="filter-item" plain type="danger">模板下载</el-button>
-  <el-dialog
-    :close-on-click-modal="false"
-    :close-on-press-escape="true"
-    title="预览"
-    width="80%"
-    class="dialo_scroll"
-    top="50px"
-    :visible.sync="preview.isVisible"
-    v-el-drag-dialog
-  >
-    <el-scrollbar>
-      <div v-html="preview.context"></div>
-    </el-scrollbar>
-  </el-dialog>
 </div>
   </div>
 </template>
 
 <script>
-  import { initQueryParams ,downloadFile} from '@/utils/commons';
-  import perInforApi from "@/api/perInfor.js";
-  import elDragDialog from '@/directive/el-drag-dialog';
+  import { initQueryParams } from '@/utils/commons';
   import summaryAfter from './summaryAfter';
   import statisticalAgo from "./statisticalAgo";
   import summaryAgo from './summaryAgo';
   import statisticalAfter from "./statisticalAfter";
     export default {
         name: "Index",
-      directives: { elDragDialog },
       components:{
         summaryAfter,
         statisticalAgo,
@@ -106,42 +81,8 @@
         handleClick(tab, event) {
           console.log(tab, event);
         },
-        exportExcel(){
-
-        },
-        newData(){
-
-        },
-        updateData(){
-
-        },
         toggleTab(tab){
           this.cut = tab;
-        },
-        DownloadExcel(){
-            if (this.queryParams.timeRange) {
-              this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
-              this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
-            }
-            let data =  JSON.parse(JSON.stringify(this.queryParams));
-            data.size = '-1';
-            // data.map.fileName = '导出';
-            perInforApi.export(data).then(response => {
-                downloadFile(response);
-            });
-        },
-        // 导出预览
-        exportExcelPreview(params = {}) {
-          if (this.queryParams.timeRange) {
-            this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
-            this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
-          }
-          // this.queryParams.map.fileName = '导出数据';
-          perInforApi.preview(this.queryParams).then(response => {
-            const res = response.data;
-            this.preview.isVisible = true;
-            this.preview.context = res.data;
-          });
         },
         countTime () {
           // 获取当前时间

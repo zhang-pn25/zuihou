@@ -74,5 +74,11 @@ export default {
       ...apiList.import,
       data
     })
+  },
+  findStaByIds(id) {
+    return axiosApi({
+      url: `/authority/station/findStaByIds/${id}`,
+      method: 'GET'
+    })
   }
 }
