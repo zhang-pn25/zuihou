@@ -17,9 +17,17 @@ const apiList = {
     method:'POST',
     url:`/nucleic/afterPersonnel`
   },
+  afterUpdatePersonnel:{
+    method:'PUT',
+    url:`/nucleic/afterPersonnel`
+  },
   afterPage:{
     method:'POST',
     url:`/nucleic/afterPersonnel/queryPage`
+  },
+  afterStatisticalPage:{
+    method:'POST',
+    url:`/nucleic/afterPersonnel/findStatisticsInfo`
   }
 }
 
@@ -54,5 +62,17 @@ export default {
       ...apiList.afterPage,
       data
     })
-  }
+  },
+  afterUpdatePersonnel(data){
+    return axiosApi({
+      ...apiList.afterUpdatePersonnel,
+      data
+    })
+  },
+  afterStatisticalPage(data){
+    return axiosApi({
+      ...apiList.afterStatisticalPage,
+      data
+    })
+  },
 }

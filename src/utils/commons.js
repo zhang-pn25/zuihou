@@ -1,5 +1,5 @@
 import commonApi from '@/api/Common'
-import dictionaryItemApi from '@/api/DictionaryItem'
+import stationApi from '@/api/Station'
 
 export const loadEnums = (codes, enums = {}) => {
   if (typeof (codes) === 'string') {
@@ -109,6 +109,30 @@ export const downloadFile = (response) => {
     link.download = fileName;
     link.click();
     window.URL.revokeObjectURL(link.href);
+  }
+}
+
+/**
+ * 获取字典key
+ * @param codes
+ * @param dicts
+ */
+export const getDictsKey = (codes,dicts = {}) => {
+  if(codes){
+    for(const code of codes){
+      let data = {
+        dictionaryType: code,
+        sort: "sortValue",
+        current: 1,
+        map: {},
+        order: "ascending",
+        timeRange: null,
+      }
+      stationApi.findStandardInfo(data).then(response => {
+        const res = response.data;
+        dicts[code] = res.data;
+      });
+    }
   }
 }
 

@@ -96,7 +96,6 @@
           <!--出生年月 -->
           <el-form-item label="出生年月:" prop="dateOfBirth">
             <el-date-picker
-              @change="dddd(summaryData.dateOfBirth)"
               v-model="summaryData.dateOfBirth"
               value-format="yyyyMMdd"
               style="width: 92%"
@@ -111,7 +110,7 @@
           <!--人员类别 -->
           <el-form-item label="人员类别:" prop="personnelType">
             <el-select style="width:92%"  placeholder="请输入人员类别" v-model="summaryData.personnelType.key" value>
-              <el-option :key="index" :label="item" :value="key" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
+              <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -237,13 +236,9 @@
         <el-col :sm="12" :xs="24">
           <!--检测类型 -->
           <el-form-item label="检测类型:" prop="checkType">
-            <el-input
-              placeholder="请输入检测类型"
-              style="width: 92%"
-              v-model="summaryData.checkType"
-              clearable
-            >
-            </el-input>
+            <el-select style="width:92%"  placeholder="请选择检测类型" clearable v-model="summaryData.checkType.key" value>
+              <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.CHECK_TYPE" />
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :sm="12" :xs="24">
@@ -266,6 +261,8 @@
             <el-input
               placeholder="请输入检测地址"
               style="width: 92%"
+              type="textarea"
+              :rows="2"
               v-model="summaryData.checkAddress"
               clearable
             >
@@ -278,7 +275,7 @@
             <el-input
               placeholder="请输入备注"
               type="textarea"
-              :rows="3"
+              :rows="2"
               style="width: 92%"
               v-model="summaryData.remarks"
               clearable
@@ -339,6 +336,9 @@
             key:'',
             data:{}
           },
+          checkType:{
+            key:'',
+          },
           post:{
             key:''
           },
@@ -353,7 +353,8 @@
         filed:[],
         stationList:[],
         dicts:{
-          PERSONNEL_TYPE:{}
+          PERSONNEL_TYPE:{},
+          CHECK_TYPE:{}
         },
         screenWidth: 0,
         width: this.initWidth(),
@@ -468,21 +469,22 @@
       };
     },
     methods: {
-      dddd(val){
-        console.log(val);
-      },
       orgFiled(val){
         this.summaryData.company.key = val.length>0?val[0]:'';
         this.summaryData.departMent.key = val.length>0?val[1]:'';
         this.summaryData.post.key = '';
         if (val.length > 0 ){
-          stationApi.findStaByIds(val[1]?val[1]:val[0]?val[0]:'').then(response => {
-            const res = response.data;
-            this.stationList = res.data;
-          });
+          this.findStaByIds(val);
         }else {
           this.stationList = [];
         }
+      },
+      // 获取职务级别的数据
+      findStaByIds(val){
+        stationApi.findStaByIds(val[1]?val[1]:val[0]?val[0]:'').then(response => {
+          const res = response.data;
+          this.stationList = res.data;
+        });
       },
       initWidth() {
         this.screenWidth = document.body.clientWidth;
@@ -498,21 +500,45 @@
         this.orgList = list;
         if (org) {
           this.summaryData = { ...org };
+          this.summaryData.filed = [org.company.key,org.departMent.key];
+          this.findStaByIds(this.summaryData.filed)
         }
         this.dicts = { ...dicts };
-        // this.taskData.orgId = val;
         this.summaryData.orgId = orgID;
       },
       close() {
         this.$emit("close");
       },
       reset() {
-        this.taskData = {
+        this.summaryData ={
+          filed:[],
+          orgId:'',
           serialNumber:'',
-          checkAddress: "",
           status: 1,
+          company:{
+            key:'',
+            data:{}
+          },
+          departMent:{
+            key:'',
+            data:{}
+          },
+          checkType:{
+            key:'',
+          },
+          post:{
+            key:'',
+            data:{}
+          },
+          sex:{
+            code:'',
+          },
+          personnelType:{
+            key:'',
+          },
           isDelete: 0,
-        };
+        }
+        this.stationList = [];
         // 先清除校验，再清除表单，不然有奇怪的bug
         this.$refs.form.clearValidate();
         this.$refs.form.resetFields();
@@ -530,20 +556,20 @@
       },
       editSubmit() {
         const vm = this;
-        if (vm.type === "add") {
-          vm.save();
-        } else {
-          vm.update();
-        }
-      },
-      save() {
-        const vm = this;
         let data = JSON.parse(JSON.stringify(this.summaryData));
         delete data.filed;
         data.specimenNumber = Number(data.specimenNumber);
         data.serialNumber = Number(data.serialNumber);
         data.accountingTestTaskId = this.$route.query.id;
-        perInforApi.beforPersonnel(data).then((response) => {
+        if (vm.type === "add") {
+          vm.save(data);
+        } else {
+          vm.update(data);
+        }
+      },
+      save(list) {
+        const vm = this;
+        perInforApi.beforPersonnel(list).then((response) => {
           const res = response.data;
           console.log(res.data);
           if (res.isSuccess) {
@@ -556,13 +582,11 @@
           }
         });
       },
-      update() {
-        let data = JSON.parse(JSON.stringify(this.summaryData));
-        delete data.filed;
-        data.specimenNumber = Number(data.specimenNumber);
-        data.serialNumber = Number(data.serialNumber);
-        data.accountingTestTaskId = this.$route.query.id;
-        taskApi.update(data).then((response) => {
+      update(list) {
+        list.company.data = {};
+        list.departMent.data = {};
+        list.post.data = {};
+        perInforApi.beforUpdatePersonnel(list).then((response) => {
           const res = response.data;
           if (res.isSuccess) {
             this.isVisible = false;

@@ -17,9 +17,17 @@ const apiList = {
     method:'POST',
     url:`/nucleic/beforPersonnel`
   },
+  beforUpdatePersonnel:{
+    method:'PUT',
+    url:`/nucleic/beforPersonnel`
+  },
   beforPage:{
     method:'POST',
     url:`/nucleic/beforPersonnel/queryPage`
+  },
+  beforStatisticalPage:{
+    method:'POST',
+    url:`/nucleic/beforPersonnel/findStatisticsInfo`
   }
 }
 
@@ -49,10 +57,22 @@ export default {
       data
     })
   },
+  beforUpdatePersonnel(data){
+    return axiosApi({
+      ...apiList.beforUpdatePersonnel,
+      data
+    })
+  },
   beforPage(data){
     return axiosApi({
       ...apiList.beforPage,
       data
     })
-  }
+  },
+  beforStatisticalPage(data){
+    return axiosApi({
+      ...apiList.beforStatisticalPage,
+      data
+    })
+  },
 }

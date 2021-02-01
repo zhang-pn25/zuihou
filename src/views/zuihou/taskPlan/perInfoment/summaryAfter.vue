@@ -6,7 +6,7 @@
       :options="orgList"
       placeholder="请选择单位部门"
       :show-all-levels="false"
-      @change="orgFiled"
+      @change="orgFiled(queryParams.model.filed)"
       v-model="queryParams.model.filed"
       clearable
     ></el-cascader>
@@ -26,11 +26,11 @@
     </el-select>
     <el-date-picker
       v-model="queryParams.model.checkTime"
-      type="datetime"
+      type="date"
       placeholder="请选择检测时间"
       align="right"
       class="filter-item search-item"
-      value-format="yyyy-MM-dd HH:mm:ss"
+      value-format="yyyy-MM-dd"
     >
     </el-date-picker>
     <el-select class="filter-item search-item" clearable v-model="queryParams.model.isAbnormal.key" placeholder="请选择检测是否异常">
@@ -44,7 +44,7 @@
     <div style="display: inline" v-show = 'seniorHidden'>
       <el-input placeholder='请输入姓名' class="filter-item search-item" v-model="queryParams.model.userName"/>
       <el-select class="filter-item search-item" placeholder="请输入人员类别" v-model="queryParams.model.personnelType.key" value>
-        <el-option :key="index" :label="item" :value="key" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
+        <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
       </el-select>
       <el-select class="filter-item search-item" clearable v-model="queryParams.model.sex.code" placeholder="请选择性别">
         <el-option
@@ -59,7 +59,9 @@
       <el-input placeholder='请输入疫苗接种类别' class="filter-item search-item" v-model="queryParams.model.inoculateType"/>
       <el-input placeholder='请输入联系电话' class="filter-item search-item" v-model="queryParams.model.phone"/>
       <el-input placeholder='请输入标本编号' class="filter-item search-item" v-model="queryParams.model.specimenNumber"/>
-      <el-input placeholder='请输入检测类型' class="filter-item search-item" v-model="queryParams.model.checkType"/>
+      <el-select class="filter-item search-item"  placeholder="请选择检测类型" v-model="queryParams.model.checkType.key" value>
+        <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.CHECK_TYPE" />
+      </el-select>
     </div>
     <el-button @click="search" class="filter-item" plain type="primary">
       {{ $t("table.search") }}
@@ -189,6 +191,9 @@
         width="120"
         prop="personnelType"
       >
+        <template slot-scope="scope">
+          <span>{{ scope.row.personnelType.data?scope.row.personnelType.data:'' }}</span>
+        </template>
       </el-table-column>
       <el-table-column
         label="身份证号"
@@ -272,6 +277,9 @@
         width="120"
         prop="checkType"
       >
+        <template slot-scope="scope">
+          <span>{{ scope.row.checkType.data?scope.row.checkType.data:'' }}</span>
+        </template>
       </el-table-column>
       <el-table-column
         label="检测时间"
@@ -279,6 +287,14 @@
         align="center"
         width="120"
         prop="checkTime"
+      >
+      </el-table-column>
+      <el-table-column
+        label="检测地址"
+        :show-overflow-tooltip="true"
+        align="center"
+        width="150"
+        prop="checkAddress"
       >
       </el-table-column>
       <el-table-column
@@ -296,6 +312,11 @@
         width="120"
         prop="isAbnormal"
       >
+        <template slot-scope="{row}">
+          <span>
+            {{ row.isAbnormal | isAbnormalFilter }}
+          </span>
+        </template>
       </el-table-column>
       <el-table-column
         label="未检测原因"
@@ -311,6 +332,14 @@
         align="center"
         width="120"
         prop="checkResultProve"
+      >
+      </el-table-column>
+      <el-table-column
+        label="个人签名"
+        :show-overflow-tooltip="true"
+        align="center"
+        width="200"
+        prop="personalSignature"
       >
       </el-table-column>
       <el-table-column
@@ -378,7 +407,7 @@
   import Edit from "./afterEdit";
   import orgApi from '@/api/Org.js'
   import afterPerInforApi from "@/api/afterPerInfor.js";
-  import { initQueryParams,downloadFile ,initDicts} from '@/utils/commons';
+  import { initQueryParams,downloadFile ,getDictsKey} from '@/utils/commons';
   import Pagination from "@/components/Pagination";
   import stationApi from "@/api/Station.js";
   import elDragDialog from '@/directive/el-drag-dialog';
@@ -386,6 +415,17 @@
     name: "summaryAgo.vue",
     components:{Edit,Pagination},
     directives: { elDragDialog },
+    filters:{
+      isAbnormalFilter(val){
+        if (val == null || val == undefined){
+          return ''
+        }else if(val == false){
+          return '否'
+        }else if (val == true) {
+          return '是'
+        }
+      }
+    },
     data(){
       return{
         tableKey: 0,
@@ -411,6 +451,10 @@
             },
             personnelType:{
               key:''
+            },
+            checkType:{
+              key:'',
+              data:''
             },
             isAbnormal:{
               key:''
@@ -443,14 +487,18 @@
           context: ''
         },
         dicts:{
-          PERSONNEL_TYPE:{}
+          PERSONNEL_TYPE:{},
+          CHECK_TYPE:{}
         }
       }
     },
     mounted() {
       this.initOrg();
       this.search();
-      initDicts(['PERSONNEL_TYPE'], this.dicts);
+      getDictsKey(
+        ["PERSONNEL_TYPE",'CHECK_TYPE'],
+        this.dicts
+      );
     },
     computed: {
       user() {
@@ -467,17 +515,9 @@
         else this.seniorHidden = true;
       },
       fetch(){
-        let data = JSON.parse(JSON.stringify(this.queryParams));
-        delete data.model.filed;
-        if (!data.model.company.key) delete data.model.company;
-        if (!data.model.departMent.key) delete data.model.departMent;
-        if (!data.model.personnelType.key) delete data.model.personnelType;
-        if (!data.model.post.key) delete data.model.post;
-        if (!data.model.isAbnormal.key) delete data.model.isAbnormal;
-        if (!data.model.sex.code) delete data.model.sex;
-        afterPerInforApi.afterPage(data).then(response =>{
+        let queryParam = this.disposeData();
+        afterPerInforApi.afterPage(queryParam).then(response =>{
           let res = response.data;
-          console.log(res.data)
           this.tableData = res.data;
         })
       },
@@ -520,6 +560,16 @@
             "data": "",
             "key": ''
           },
+          personnelType:{
+            key:''
+          },
+          checkType:{
+            key:'',
+            data:''
+          },
+          isAbnormal:{
+            key:''
+          },
           "isDelete": true,
           "post": {
             "data": "",
@@ -530,7 +580,10 @@
             "desc": ""
           },
           "status": true,
+          filed:[],
         }
+        this.stationList = [];
+        this.search();
       },
       edit(row){
         this.dialog.type = "edit";
@@ -542,13 +595,27 @@
         this.dialog.isVisible = true;
         this.$refs.edit.setUser(false,this.orgList,this.user.orgId,this.dicts);
       },
+      disposeData(){
+        let data = JSON.parse(JSON.stringify(this.queryParams));
+        delete data.model.filed;
+        if (!data.model.company.key) delete data.model.company;
+        if (!data.model.departMent.key) delete data.model.departMent;
+        if (!data.model.personnelType.key) delete data.model.personnelType;
+        if (!data.model.post.key) delete data.model.post;
+        if (!data.model.isAbnormal.key) delete data.model.isAbnormal;
+        if (!data.model.checkType.key) delete data.model.checkType;
+        if (!data.model.sex.code) delete data.model.sex;
+        return data;
+      },
       // 导出excel
       exportExcel(){
         if (this.queryParams.timeRange) {
           this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
           this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
         }
-        afterPerInforApi.export(this.queryParams).then(response => {
+        let queryParam = this.disposeData();
+        queryParam.map.fileName = '检测后人员信息汇总'
+        afterPerInforApi.export(queryParam).then(response => {
           downloadFile(response);
         });
       },
@@ -558,7 +625,9 @@
           this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
           this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
         }
-        afterPerInforApi.preview(this.queryParams).then(response => {
+        let queryParam = this.disposeData();
+        queryParam.map.fileName = '检测后人员信息汇总预览'
+        afterPerInforApi.preview(queryParam).then(response => {
           const res = response.data;
           this.preview.isVisible = true;
           this.preview.context = res.data;
@@ -574,16 +643,11 @@
       },
       // 模板下载
       stencilExcel(){
-        if (this.queryParams.timeRange) {
-          this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
-          this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
-        }
-        let dataExcel = JSON.parse(JSON.stringify(this.queryParams));
-        delete dataExcel.model.filed;
-        dataExcel.page = 0;
-        dataExcel.size = 0;
-        dataExcel.map.fileName = "11111";
-        afterPerInforApi.export(dataExcel).then(response => {
+        let queryParam = this.disposeData();
+        queryParam.map.fileName = '检测后人员信息汇总模板'
+        queryParam.page = 0;
+        queryParam.size = 0;
+        afterPerInforApi.export(queryParam).then(response => {
           downloadFile(response);
         });
       },

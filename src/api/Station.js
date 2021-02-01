@@ -28,7 +28,11 @@ const apiList = {
   import: {
     method: 'POST',
     url: `/authority/station/import`
-  }
+  },
+  findStandardInfo: {
+    method: 'POST',
+    url:`/authority/dictionaryItem/findStandardType`,
+  },
 }
 
 export default {
@@ -80,5 +84,11 @@ export default {
       url: `/authority/station/findStaByIds/${id}`,
       method: 'GET'
     })
-  }
+  },
+  findStandardInfo (data) {
+    return axiosApi({
+      ...apiList.findStandardInfo,
+      data
+    })
+  },
 }

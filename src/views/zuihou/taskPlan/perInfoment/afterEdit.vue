@@ -96,7 +96,6 @@
           <!--出生年月 -->
           <el-form-item label="出生年月:" prop="dateOfBirth">
             <el-date-picker
-              @change="dddd(summaryData.dateOfBirth)"
               v-model="summaryData.dateOfBirth"
               value-format="yyyyMMdd"
               style="width: 92%"
@@ -111,7 +110,7 @@
           <!--人员类别 -->
           <el-form-item label="人员类别:" prop="personnelType.key">
             <el-select style="width:92%"  placeholder="请输入人员类别" v-model="summaryData.personnelType.key" value>
-              <el-option :key="index" :label="item" :value="key" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
+              <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
             </el-select>
           </el-form-item>
         </el-col>
@@ -237,13 +236,9 @@
         <el-col :sm="12" :xs="24">
           <!--检测类型 -->
           <el-form-item label="检测类型:" prop="checkType">
-            <el-input
-              placeholder="请输入检测类型"
-              style="width: 92%"
-              v-model="summaryData.checkType"
-              clearable
-            >
-            </el-input>
+            <el-select style="width:92%" clearable placeholder="请选择检测类型" v-model="summaryData.checkType.key" value>
+              <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.CHECK_TYPE" />
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :sm="12" :xs="24">
@@ -263,13 +258,15 @@
         <el-col :sm="12" :xs="24">
           <!--检测时间 -->
           <el-form-item label="检测时间:" prop="checkTime">
-            <el-input
-              placeholder="请输入检测时间"
-              style="width: 92%"
+            <el-date-picker
               v-model="summaryData.checkTime"
-              clearable
+              type="date"
+              style="width: 92%"
+              placeholder="请选择检测时间"
+              align="right"
+              value-format="yyyy-MM-dd"
             >
-            </el-input>
+            </el-date-picker>
           </el-form-item>
         </el-col>
         <el-col :sm="12" :xs="24">
@@ -289,7 +286,7 @@
         <el-col :sm="12" :xs="24">
           <!--是否异常 -->
             <el-form-item label="是否异常:" prop="isAbnormal">
-              <el-select style="width: 92%" clearable v-model="summaryData.isAbnormal.key" placeholder="请选择检测是否异常">
+              <el-select style="width: 92%" clearable v-model="summaryData.isAbnormal" placeholder="请选择检测是否异常">
                 <el-option
                   v-for="item in isAbnormalList"
                   :key="item.value"
@@ -349,9 +346,9 @@
           <!--结果证明 -->
           <el-form-item label="结果证明:" prop="checkAddress">
             <el-input
-              placeholder="请输入检测地址"
+              placeholder="请输入检测结果证明"
               style="width: 92%"
-              v-model="summaryData.checkAddress"
+              v-model="summaryData.checkResultProve"
               clearable
             >
             </el-input>
@@ -372,7 +369,7 @@
 <script>
   import taskApi from "@/api/task.js";
   import stationApi from "@/api/Station.js";
-  import perInforApi from "@/api/perInfor.js";
+  import afterPerInforApi from "@/api/afterPerInfor.js";
   export default {
     name: "UserEdit",
     props: {
@@ -397,8 +394,8 @@
           {value:false,label:'否'},
         ],
         isAbnormalList:[
-          {value:'0',label:'否'},
-          {value:'1',label:'是'},
+          {value:false,label:'否'},
+          {value:true,label:'是'},
         ],
         summaryData: {
           filed:[],
@@ -423,13 +420,14 @@
           sex:{
             code:'',
           },
-          isAbnormal:{
-            keyp:'',
+          checkType:{
+            key:''
           },
-          isDelete: 0,
+          isDelete: false,
         },
         dicts:{
-          PERSONNEL_TYPE:{}
+          PERSONNEL_TYPE:{},
+          CHECK_TYPE:{}
         },
         filed:[],
         stationList:[],
@@ -494,21 +492,47 @@
             message: this.$t("rules.require"),
             trigger: "blur",
           },
-          idCard:{
+          idCard:[{
             required: true,
             message: this.$t("rules.require"),
             trigger: "blur",
           },
+            {
+              validator: (rule, value, callback) => {
+                let reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+                console.log(reg.test(value));
+                if (reg.test(value)) {
+                  callback();
+                } else {
+                  callback('请输入正确的身份证号码');
+                }
+              },
+              trigger: "blur",
+            }
+          ],
           homeAddress:{
             required: true,
             message: this.$t("rules.require"),
             trigger: "blur",
           },
-          phone:{
+          phone:[{
             required: true,
             message: this.$t("rules.require"),
             trigger: "blur",
           },
+            {
+              validator: (rule, value, callback) => {
+                let reg = /^[1][3,4,5,6,7,8,9][0-9]{9}$/;
+                console.log(reg.test(value));
+                if (reg.test(value)) {
+                  callback();
+                } else {
+                  callback('请输入正确的手机号码');
+                }
+              },
+              trigger: "blur",
+            }
+          ],
           'personnelType.key':{
             required: true,
             message: this.$t("rules.require"),
@@ -539,21 +563,22 @@
       };
     },
     methods: {
-      dddd(val){
-        console.log(val);
-      },
       orgFiled(val){
         this.summaryData.company.key = val.length>0?val[0]:'';
         this.summaryData.departMent.key = val.length>0?val[1]:'';
         this.summaryData.post.key = '';
         if (val.length > 0 ){
-          stationApi.findStaByIds(val[1]?val[1]:val[0]?val[0]:'').then(response => {
-            const res = response.data;
-            this.stationList = res.data;
-          });
+          this.findStaByIds(val);
         }else {
           this.stationList = [];
         }
+      },
+      // 获取职务级别的数据
+      findStaByIds(val){
+        stationApi.findStaByIds(val[1]?val[1]:val[0]?val[0]:'').then(response => {
+          const res = response.data;
+          this.stationList = res.data;
+        });
       },
       initWidth() {
         this.screenWidth = document.body.clientWidth;
@@ -569,6 +594,8 @@
         this.orgList = list;
         if (org) {
           this.summaryData = { ...org };
+          this.summaryData.filed = [org.company.key,org.departMent.key];
+          this.findStaByIds(this.summaryData.filed)
         }
         this.dicts = { ...dicts };
         // this.taskData.orgId = val;
@@ -578,12 +605,35 @@
         this.$emit("close");
       },
       reset() {
-        this.taskData = {
+        this.summaryData = {
+          filed:[],
+          orgId:'',
           serialNumber:'',
-          checkAddress: "",
           status: 1,
-          isDelete: 0,
-        };
+          company:{
+            key:'',
+            data:{}
+          },
+          departMent:{
+            key:'',
+            data:{}
+          },
+          personnelType:{
+            key:'',
+            data:'',
+          },
+          post:{
+            key:''
+          },
+          sex:{
+            code:'',
+          },
+          checkType:{
+            key:''
+          },
+          isDelete: false,
+        }
+        this.stationList = [];
         // 先清除校验，再清除表单，不然有奇怪的bug
         this.$refs.form.clearValidate();
         this.$refs.form.resetFields();
@@ -601,20 +651,20 @@
       },
       editSubmit() {
         const vm = this;
-        if (vm.type === "add") {
-          vm.save();
-        } else {
-          vm.update();
-        }
-      },
-      save() {
-        const vm = this;
         let data = JSON.parse(JSON.stringify(this.summaryData));
         delete data.filed;
         data.specimenNumber = Number(data.specimenNumber);
         data.serialNumber = Number(data.serialNumber);
         data.accountingTestTaskId = this.$route.query.id;
-        perInforApi.beforPersonnel(data).then((response) => {
+        if (vm.type === "add") {
+          vm.save(data);
+        } else {
+          vm.update(data);
+        }
+      },
+      save(list) {
+        const vm = this;
+        afterPerInforApi.afterPersonnel(list).then((response) => {
           const res = response.data;
           console.log(res.data);
           if (res.isSuccess) {
@@ -627,8 +677,11 @@
           }
         });
       },
-      update() {
-        taskApi.update(this.taskData).then((response) => {
+      update(list) {
+        list.company.data = {};
+        list.departMent.data = {};
+        list.post.data = {};
+        afterPerInforApi.afterUpdatePersonnel(list).then((response) => {
           const res = response.data;
           if (res.isSuccess) {
             this.isVisible = false;

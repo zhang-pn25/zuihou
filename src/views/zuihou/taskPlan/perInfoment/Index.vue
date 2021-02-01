@@ -22,7 +22,7 @@
       </el-row>
       <el-row>
         <el-col :span="24">
-          <div style="margin-top: 50px">
+          <div style="margin-top: 30px">
             <component v-bind:is="cut" keep-alive></component>
           </div>
         </el-col>

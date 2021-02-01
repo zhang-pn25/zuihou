@@ -6,6 +6,7 @@
       :options="orgList"
       placeholder="请选择单位部门"
       :show-all-levels="false"
+      @change="orgFiled(queryParams.model.filed)"
       v-model="queryParams.model.filed"
       clearable
     ></el-cascader>
@@ -24,8 +25,8 @@
       />
     </el-select>
     <el-input placeholder='请输入姓名' class="filter-item search-item" v-model="queryParams.model.userName"/>
-    <el-select class="filter-item search-item" placeholder="请输入人员类别" v-model="queryParams.model.personnelType.key" value>
-      <el-option :key="index" :label="item" :value="key" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
+    <el-select class="filter-item search-item" clearable placeholder="请输入人员类别" v-model="queryParams.model.personnelType.key" value>
+      <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
     </el-select>
     <div style="display: inline" v-show = 'seniorHidden'>
       <el-select class="filter-item search-item" clearable v-model="queryParams.model.sex.code" placeholder="请选择性别">
@@ -41,7 +42,9 @@
       <el-input placeholder='请输入疫苗接种类别' class="filter-item search-item" v-model="queryParams.model.inoculateType"/>
       <el-input placeholder='请输入联系电话' class="filter-item search-item" v-model="queryParams.model.phone"/>
       <el-input placeholder='请输入标本编号' class="filter-item search-item" v-model="queryParams.model.specimenNumber"/>
-      <el-input placeholder='请输入检测类型' class="filter-item search-item" v-model="queryParams.model.checkType"/>
+      <el-select class="filter-item search-item"  placeholder="请选择检测类型" v-model="queryParams.model.checkType.key" value>
+        <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.CHECK_TYPE" />
+      </el-select>
     </div>
     <el-button @click="search" class="filter-item" plain type="primary">
       {{ $t("table.search") }}
@@ -164,14 +167,17 @@
         <span>{{ scope.row.dateOfBirth }}</span>
       </template>
     </el-table-column>
-<!--    <el-table-column-->
-<!--      label="人员类别"-->
-<!--      :show-overflow-tooltip="true"-->
-<!--      align="center"-->
-<!--      width="120"-->
-<!--      prop="personnelType"-->
-<!--    >-->
-<!--    </el-table-column>-->
+    <el-table-column
+      label="人员类别"
+      :show-overflow-tooltip="true"
+      align="center"
+      width="120"
+      prop="personnelType"
+    >
+      <template slot-scope="scope">
+        <span>{{ scope.row.personnelType.data?scope.row.personnelType.data:'' }}</span>
+      </template>
+    </el-table-column>
     <el-table-column
       label="身份证号"
       :show-overflow-tooltip="true"
@@ -254,6 +260,25 @@
       width="120"
       prop="checkType"
     >
+      <template slot-scope="{row}">
+        <span>{{row.checkType.data?row.checkType.data:''}}</span>
+      </template>
+    </el-table-column>
+    <el-table-column
+      label="检测地址"
+      :show-overflow-tooltip="true"
+      align="center"
+      width="150"
+      prop="checkAddress"
+    >
+    </el-table-column>
+    <el-table-column
+      label="个人签名"
+      :show-overflow-tooltip="true"
+      align="center"
+      width="120"
+      prop="personalSignature"
+    >
     </el-table-column>
     <el-table-column
       label="备注"
@@ -320,7 +345,7 @@
   import Edit from "./agoEdit";
   import orgApi from '@/api/Org.js'
   import perInforApi from "@/api/perInfor.js";
-  import { initQueryParams,downloadFile ,initDicts} from '@/utils/commons';
+  import { initQueryParams,downloadFile ,initDicts ,getDictsKey} from '@/utils/commons';
   import Pagination from "@/components/Pagination";
   import stationApi from "@/api/Station.js";
   import elDragDialog from '@/directive/el-drag-dialog';
@@ -348,6 +373,9 @@
                   "key": ''
                 },
                 personnelType:{
+                  key:''
+                },
+                checkType:{
                   key:''
                 },
                 "isDelete": true,
@@ -378,17 +406,18 @@
             context: ''
           },
           dicts:{
-            PERSONNEL_TYPE:{}
+            PERSONNEL_TYPE:{},
+            CHECK_TYPE:{}
           }
         }
       },
       mounted() {
         this.initOrg();
         this.search();
-        initDicts(['PERSONNEL_TYPE'], this.dicts);
-      },
-      watch:{
-        'queryParams.model.filed':'orgFiled'
+        getDictsKey(
+          ["PERSONNEL_TYPE",'CHECK_TYPE'],
+          this.dicts
+        );
       },
       computed: {
         user() {
@@ -400,14 +429,8 @@
             this.fetch();
         },
         fetch(){
-          let data = JSON.parse(JSON.stringify(this.queryParams));
-          delete data.model.filed;
-          if (!data.model.company.key) delete data.model.company;
-          if (!data.model.departMent.key) delete data.model.departMent;
-          if (!data.model.personnelType.key) delete data.model.personnelType;
-          if (!data.model.post.key) delete data.model.post;
-          if (!data.model.sex.code) delete data.model.sex;
-          perInforApi.beforPage(data).then(response =>{
+          let queryParam = this.disposeData();
+          perInforApi.beforPage(queryParam).then(response =>{
             let res = response.data;
             this.tableData = res.data;
           })
@@ -454,21 +477,26 @@
               "data": "",
               "key": ''
             },
+            personnelType:{
+              key:''
+            },
+            checkType:{
+              key:''
+            },
             "isDelete": true,
             "post": {
               "data": "",
               "key": ''
-            },
-            personnelType:{
-              key:'',
             },
             "sex": {
               "code": "",
               "desc": ""
             },
             "status": true,
-            filed: [],
+            filed:[],
           }
+          this.stationList = [];
+          this.search();
         },
         edit(row){
           this.dialog.type = "edit";
@@ -480,13 +508,27 @@
           this.dialog.isVisible = true;
           this.$refs.edit.setUser(false,this.orgList,this.user.orgId,this.dicts);
         },
+        // 根据接口要求进行数据处理
+        disposeData(){
+          let data = JSON.parse(JSON.stringify(this.queryParams));
+          delete data.model.filed;
+          if (!data.model.company.key) delete data.model.company;
+          if (!data.model.departMent.key) delete data.model.departMent;
+          if (!data.model.personnelType.key) delete data.model.personnelType;
+          if (!data.model.post.key) delete data.model.post;
+          if (!data.model.sex.code) delete data.model.sex;
+          if (!data.model.checkType.key) delete data.model.checkType;
+          return data;
+        },
         // 导出excel
         exportExcel(){
           if (this.queryParams.timeRange) {
             this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
             this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
           }
-          perInforApi.export(this.queryParams).then(response => {
+          let queryParam = this.disposeData();
+          queryParam.map.fileName = "检测前人员信息汇总";
+          perInforApi.export(queryParam).then(response => {
             downloadFile(response);
           });
         },
@@ -496,7 +538,8 @@
             this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
             this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
           }
-          perInforApi.preview(this.queryParams).then(response => {
+          let queryParam = this.disposeData();
+          perInforApi.preview(queryParam).then(response => {
             const res = response.data;
             this.preview.isVisible = true;
             this.preview.context = res.data;
@@ -516,11 +559,11 @@
             this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
             this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
           }
-          let dataExcel = JSON.parse(JSON.stringify(this.queryParams));
-          dataExcel.page = 0;
-          dataExcel.size = 0;
-          dataExcel.map.fileName = "人员信息汇总检测前模板下载";
-          perInforApi.export(dataExcel).then(response => {
+          let queryParam = this.disposeData();
+          queryParam.page = 0;
+          queryParam.size = 0;
+          queryParam.map.fileName = "检测前人员信息汇总模板";
+          perInforApi.export(queryParam).then(response => {
             downloadFile(response);
           });
         },
