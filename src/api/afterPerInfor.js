@@ -25,6 +25,10 @@ const apiList = {
     method:'POST',
     url:`/nucleic/afterPersonnel/queryPage`
   },
+  allPage:{
+    method:'POST',
+    url:`/nucleic/afterPersonnel/queryPageAll`
+  },
   afterStatisticalPage:{
     method:'POST',
     url:`/nucleic/afterPersonnel/findStatisticsInfo`
@@ -60,6 +64,12 @@ export default {
   afterPage(data){
     return axiosApi({
       ...apiList.afterPage,
+      data
+    })
+  },
+  allPage(data){
+    return axiosApi({
+      ...apiList.allPage,
       data
     })
   },

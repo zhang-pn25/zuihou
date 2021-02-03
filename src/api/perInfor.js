@@ -5,29 +5,39 @@ const apiList = {
     method:'POST',
     url:`/nucleic/beforPersonnel/exportExcelReWrite`
   },
-  import:{
+  beforeImport:{
     method:'POST',
     url:`/nucleic/beforPersonnel/import`
   },
   preview:{
     method:'POST',
-    url:`/nucleic/beforPersonnel/previewReWiter`
+    url:`/nucleic/afterPersonnel/previewReWiter`
   },
-  beforPersonnel:{
+  afterPersonnel:{
     method:'POST',
-    url:`/nucleic/beforPersonnel`
+    url:`/nucleic/afterPersonnel`
   },
-  beforUpdatePersonnel:{
+  beforeUpdatePersonnel:{
     method:'PUT',
     url:`/nucleic/beforPersonnel`
   },
-  beforPage:{
+  beforePage:{
     method:'POST',
     url:`/nucleic/beforPersonnel/queryPage`
   },
-  beforStatisticalPage:{
+  afterStatisticalPage:{
     method:'POST',
-    url:`/nucleic/beforPersonnel/findStatisticsInfo`
+    url:`/nucleic/afterPersonnel/findStatisticsInfo`
+  },
+  // 上传的临时表确认按钮
+  determineSaveBach:{
+    method:'POST',
+    url:`/nucleic/beforPersonnel/determineSaveBach`
+  },
+  // 上传的临时表取消按钮
+  cancelSaveBach:{
+    method:'POST',
+    url:`/nucleic/beforPersonnel/cancelSaveBach`
   }
 }
 
@@ -39,9 +49,9 @@ export default {
       data
     })
   },
-  import(data){
+  beforeImport(data){
     return axiosApi({
-      ...apiList.import,
+      ...apiList.beforeImport,
       data
     })
   },
@@ -51,28 +61,40 @@ export default {
       data
     })
   },
-  beforPersonnel(data){
+  afterPersonnel(data){
     return axiosApi({
-      ...apiList.beforPersonnel,
+      ...apiList.afterPersonnel,
       data
     })
   },
-  beforUpdatePersonnel(data){
+  beforeUpdatePersonnel(data){
     return axiosApi({
-      ...apiList.beforUpdatePersonnel,
+      ...apiList.beforeUpdatePersonnel,
       data
     })
   },
-  beforPage(data){
+  beforePage(data){
     return axiosApi({
-      ...apiList.beforPage,
+      ...apiList.beforePage,
       data
     })
   },
-  beforStatisticalPage(data){
+  afterStatisticalPage(data){
     return axiosApi({
-      ...apiList.beforStatisticalPage,
+      ...apiList.afterStatisticalPage,
       data
     })
   },
+  determineSaveBach(data){
+    return axiosApi({
+      ...apiList.determineSaveBach,
+      data
+    })
+  },
+  cancelSaveBach(data){
+    return axiosApi({
+      ...apiList.cancelSaveBach,
+      data
+    })
+  }
 }

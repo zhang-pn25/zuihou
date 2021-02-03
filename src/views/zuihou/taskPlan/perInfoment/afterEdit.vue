@@ -297,21 +297,32 @@
             </el-form-item>
         </el-col>
         <el-col :sm="12" :xs="24">
+          <!--是否异常 -->
+          <el-form-item label="检测途径:" prop="checkChannel">
+              <el-input
+                placeholder="请输入检测途径"
+                style="width: 92%"
+                v-model="summaryData.checkChannel"
+                clearable
+              />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :sm="12" :xs="24">
           <!--未检测原因 -->
           <el-form-item label="未检测原因:" prop="notDetectedReason">
             <el-input
               placeholder="请输入未检测原因"
               style="width: 92%"
               type="textarea"
-              :rows="3"
+              :rows="2"
               v-model="summaryData.notDetectedReason"
               clearable
             >
             </el-input>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :sm="12" :xs="24">
           <!--检测地址 -->
           <el-form-item label="检测地址:" prop="checkAddress">
@@ -319,22 +330,8 @@
               placeholder="请输入检测地址"
               style="width: 92%"
               type="textarea"
-              :rows="3"
+              :rows="2"
               v-model="summaryData.checkAddress"
-              clearable
-            >
-            </el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :sm="12" :xs="24">
-          <!--备注 -->
-          <el-form-item label="备注:" prop="remarks">
-            <el-input
-              placeholder="请输入备注"
-              type="textarea"
-              :rows="3"
-              style="width: 92%"
-              v-model="summaryData.remarks"
               clearable
             >
             </el-input>
@@ -348,7 +345,23 @@
             <el-input
               placeholder="请输入检测结果证明"
               style="width: 92%"
+              type="textarea"
+              :rows="2"
               v-model="summaryData.checkResultProve"
+              clearable
+            >
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :sm="12" :xs="24">
+          <!--备注 -->
+          <el-form-item label="备注:" prop="remarks">
+            <el-input
+              placeholder="请输入备注"
+              type="textarea"
+              :rows="2"
+              style="width: 92%"
+              v-model="summaryData.remarks"
               clearable
             >
             </el-input>

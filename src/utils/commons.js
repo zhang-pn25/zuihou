@@ -136,6 +136,19 @@ export const getDictsKey = (codes,dicts = {}) => {
   }
 }
 
+// 字符串截取与拼接
+export const assignment = (list,val) => {
+  let stringResult = list.split(',');
+  switch  (stringResult.length) {
+    case 2 :
+      return [val,'',''];
+    case 3:
+      return [stringResult[1],val,'']
+    case 4:
+      return [stringResult[1],stringResult[2],val]
+  }
+}
+
 // 初始化查询参数
 export const initQueryParams = params => {
   const defParams = {

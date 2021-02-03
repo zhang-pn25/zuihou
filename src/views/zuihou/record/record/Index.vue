@@ -1,78 +1,24 @@
 <template>
-  <div>
-    <treeselect
-      :clear-value-text="$t('common.clear')"
-      :load-options="loadListOptions"
-      :normalizer="normalizer"
-      :multiple="false"
-      :options="orgList"
-      placeholder="请选择单位部门"
-      :searchable="true"
-      class="filter-item search-item"
-      v-model="queryParams.model.filed"
-    />
-    <el-select
-      :multiple="false"
-      clearable
-      class="filter-item search-item"
-      placeholder="请选择职务"
-      v-model="queryParams.model.post.key"
-    >
-      <el-option
-        :key="item.id"
-        :label="item.name"
-        :value="item.id"
-        v-for="item in stationList"
+  <div class="app-container">
+    <div class="filter-container">
+      <treeselect
+        :clear-value-text="$t('common.clear')"
+        :load-options="loadListOptions"
+        :normalizer="normalizer"
+        :multiple="false"
+        :options="orgList"
+        placeholder="请选择单位部门"
+        :searchable="true"
+        class="filter-item search-item"
+        v-model="queryParams.model.filed"
       />
-    </el-select>
-    <el-date-picker
-      v-model="queryParams.model.checkTime"
-      type="date"
-      placeholder="请选择检测时间"
-      align="right"
-      class="filter-item search-item"
-      value-format="yyyy-MM-dd"
-    >
-    </el-date-picker>
-    <el-select class="filter-item search-item" clearable v-model="queryParams.model.isAbnormal.key" placeholder="请选择检测是否异常">
-      <el-option
-        v-for="item in isAbnormalList"
-        :key="item.value"
-        :label="item.label"
-        :value="item.value">
-      </el-option>
-    </el-select>
-    <div style="display: inline" v-show = 'seniorType'>
-      <el-input placeholder='请输入姓名' class="filter-item search-item" v-model="queryParams.model.userName"/>
-      <el-select class="filter-item search-item" placeholder="请输入人员类别" v-model="queryParams.model.personnelType.key" value>
-        <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
-      </el-select>
-      <el-select class="filter-item search-item" clearable v-model="queryParams.model.sex.code" placeholder="请选择性别">
-        <el-option
-          v-for="item in genderData"
-          :key="item.code"
-          :label="item.label"
-          :value="item.code">
-        </el-option>
-      </el-select>
-      <el-input placeholder='请输入身份证号' class="filter-item search-item" v-model="queryParams.model.idNumber"/>
-      <el-input placeholder='请输入借调类型' class="filter-item search-item" v-model="queryParams.model.secondmentType"/>
-      <el-input placeholder='请输入疫苗接种类别' class="filter-item search-item" v-model="queryParams.model.inoculateType"/>
-      <el-input placeholder='请输入联系电话' class="filter-item search-item" v-model="queryParams.model.phone"/>
-      <el-input placeholder='请输入标本编号' class="filter-item search-item" v-model="queryParams.model.specimenNumber"/>
-      <el-select class="filter-item search-item"  placeholder="请选择检测类型" v-model="queryParams.model.checkType.key" value>
-        <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.CHECK_TYPE" />
-      </el-select>
-    </div>
+    <el-input placeholder='请输入姓名' class="filter-item search-item" v-model="queryParams.model.userName"/>
     <el-button @click="search" class="filter-item" plain type="primary">
       {{ $t("table.search") }}
     </el-button>
     <el-button @click="reset" class="filter-item" plain type="warning">
       {{ $t("table.reset") }}
     </el-button>
-<!--    <el-button @click="add" class="filter-item" plain type="danger" v-has-permission="['user:add']">-->
-<!--      {{ $t("table.add") }}-->
-<!--    </el-button>-->
     <el-button type="info" plain @click="returnPage" class="filter-item">返回</el-button>
     <el-dropdown class="filter-item" trigger="click"
                  v-has-any-permission="[
@@ -92,18 +38,8 @@
         <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:delete']">
           导出预览
         </el-dropdown-item>
-        <el-dropdown-item @click.native="addExcel" v-has-permission="['user:export']">
-          新增
-        </el-dropdown-item>
-        <el-dropdown-item @click.native="updateExcel" v-has-permission="['user:export']">
-          更新
-        </el-dropdown-item>
-        <el-dropdown-item @click.native="stencilExcel" v-has-permission="['user:import']">
-          模板下载
-        </el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
-    <el-button type="primary" plain class="filter-item" @click="seniorChange" :icon="seniorSearch.icon">{{seniorSearch.text}}</el-button>
     <el-table
       :data="tableData.records"
       :key="tableKey"
@@ -127,7 +63,7 @@
         prop="company"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.company.data?scope.row.company.data:'' }}</span>
+          <span>{{ scope.row.company.data?scope.row.company.data.label:'' }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -138,7 +74,7 @@
         prop="departMent"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.departMent.data?scope.row.departMent.data:'' }}</span>
+          <span>{{ scope.row.departMent.data?scope.row.departMent.data.label:'' }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -149,7 +85,7 @@
         prop="post"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.post.data?scope.row.post.data:'' }}</span>
+          <span>{{ scope.row.post.data?scope.row.post.data.name:'' }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -283,14 +219,6 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="检测地址"
-        :show-overflow-tooltip="true"
-        align="center"
-        width="150"
-        prop="checkAddress"
-      >
-      </el-table-column>
-      <el-table-column
         label="检测时间"
         :show-overflow-tooltip="true"
         align="center"
@@ -299,19 +227,19 @@
       >
       </el-table-column>
       <el-table-column
+        label="检测地址"
+        :show-overflow-tooltip="true"
+        align="center"
+        width="150"
+        prop="checkAddress"
+      >
+      </el-table-column>
+      <el-table-column
         label="检测结果"
         :show-overflow-tooltip="true"
         align="center"
         width="120"
         prop="checkResult"
-      >
-      </el-table-column>
-      <el-table-column
-        label="检测途径"
-        :show-overflow-tooltip="true"
-        align="center"
-        width="120"
-        prop="checkChannel"
       >
       </el-table-column>
       <el-table-column
@@ -359,27 +287,6 @@
         prop="remarks"
       >
       </el-table-column>
-<!--      <el-table-column-->
-<!--        label="操作"-->
-<!--        column-key="operation"-->
-<!--        align="center"-->
-<!--        class-name="small-padding fixed-width"-->
-<!--        width="100px"-->
-<!--      >-->
-<!--        <template slot-scope="{ row }">-->
-<!--          <i-->
-<!--            @click="edit(row)"-->
-<!--            class="el-icon-edit table-operation"-->
-<!--            style="color: #2db7f5;"-->
-<!--            title="修改"-->
-<!--            v-hasPermission="['role:update']"-->
-<!--          />-->
-<!--          <el-link class="no-perm" v-has-no-permission="['loginLog:delete']">{{-->
-<!--            $t("tips.noPermission")-->
-<!--            }}-->
-<!--          </el-link>-->
-<!--        </template>-->
-<!--      </el-table-column>-->
     </el-table>
     <pagination
       :limit.sync="queryParams.size"
@@ -388,13 +295,6 @@
       @pagination="fetch"
       v-show="tableData.total > 0"
     />
-<!--    <edit-->
-<!--      :dialog-visible="dialog.isVisible"-->
-<!--      :type="dialog.type"-->
-<!--      @close="editClose"-->
-<!--      @success="editSuccess"-->
-<!--      ref="edit"-->
-<!--    />-->
     <el-dialog
       :close-on-click-modal="false"
       :close-on-press-escape="true"
@@ -410,20 +310,19 @@
       </el-scrollbar>
     </el-dialog>
   </div>
+  </div>
 </template>
 
 <script>
-  // import Edit from "./afterEdit";
-  import orgApi from '@/api/Org.js'
   import Treeselect from "@riophae/vue-treeselect";
   import "@riophae/vue-treeselect/dist/vue-treeselect.css";
+  import orgApi from '@/api/Org.js'
   import afterPerInforApi from "@/api/afterPerInfor.js";
   import { initQueryParams,downloadFile ,getDictsKey,assignment} from '@/utils/commons';
   import Pagination from "@/components/Pagination";
-  import stationApi from "@/api/Station.js";
   import elDragDialog from '@/directive/el-drag-dialog';
   export default {
-    name: "summaryAgo.vue",
+    name: "summaryRecord.vue",
     components:{Pagination,Treeselect},
     directives: { elDragDialog },
     filters:{
@@ -460,25 +359,7 @@
               "data": "",
               "key": ''
             },
-            personnelType:{
-              key:''
-            },
-            checkType:{
-              key:'',
-              data:''
-            },
-            isAbnormal:{
-              key:''
-            },
             "isDelete": true,
-            "post": {
-              "data": "",
-              "key": ''
-            },
-            "sex": {
-              "code": "",
-              "desc": ""
-            },
             "status": true,
             filed:null,
           }
@@ -487,11 +368,7 @@
           {code:'M',label:'男'},
           {code:'W',label:'女'},
         ],
-        seniorSearch:{
-          icon:'el-icon-search',
-          text:'高级搜索'
-        },
-        seniorType:false,
+        seniorHidden:false,
         stationList:[],
         dialog: {
           isVisible: false,
@@ -521,35 +398,29 @@
         return this.$store.state.account.user;
       },
     },
+    watch:{
+      'queryParams.model.filed':'orgFiled'
+    },
     methods:{
       search(){
         this.fetch();
       },
       // 高级搜索
-      seniorChange(){
-        if (this.seniorType){
-          this.seniorType = false;
-          this.seniorSearch = {
-            icon:'el-icon-search',
-            text:'高级搜索'
-          }
-        }else {
-          this.seniorType = true;
-          this.seniorSearch = {
-            icon:'el-icon-circle-close',
-            text:'关闭'
-          }
-        }
+      seniorSearch(){
+        if (this.seniorHidden) this.seniorHidden = false;
+        else this.seniorHidden = true;
       },
       fetch(){
         let queryParam = this.disposeData();
-        afterPerInforApi.afterPage(queryParam).then(response =>{
+        afterPerInforApi.allPage(queryParam).then(response =>{
           let res = response.data;
           this.tableData = res.data;
         })
       },
       // 监听部门单位数据变化
       orgFiled(val){
+        this.queryParams.model.company.key = val.length>0?val[0]:'';
+        this.queryParams.model.departMent.key = val.length>0?val[1]:'';
         let data = "";
         data = assignment(
           this.getNode(
@@ -559,17 +430,9 @@
           ),
           val
         );
+        console.log(data);
         this.queryParams.model.company.key = val ? data[0] : null;
         this.queryParams.model.departMent.key = val ? data[1] : null;
-        this.queryParams.model.post.key = '';
-        if (val){
-          stationApi.findStaByIds(data[1]?data[1]:data[0]?data[0]:'').then(response => {
-            const res = response.data;
-            this.stationList = res.data;
-          });
-        }else {
-          this.stationList = [];
-        }
       },
       initOrg() {
         orgApi.allTree({status: true})
@@ -595,51 +458,27 @@
             "data": "",
             "key": ''
           },
-          personnelType:{
-            key:''
-          },
-          checkType:{
-            key:'',
-            data:''
-          },
-          isAbnormal:{
-            key:''
-          },
           "isDelete": true,
-          "post": {
-            "data": "",
-            "key": ''
-          },
-          "sex": {
-            "code": "",
-            "desc": ""
-          },
           "status": true,
           filed:[],
         }
-        this.stationList = [];
         this.search();
       },
       edit(row){
-        // this.dialog.type = "edit";
-        // this.dialog.isVisible = true;
-        // this.$refs.edit.setUser(row,this.orgList,this.user.orgId,this.dicts);
+        this.dialog.type = "edit";
+        this.dialog.isVisible = true;
+        this.$refs.edit.setUser(row,this.orgList,this.user.orgId,this.dicts);
       },
-      // add(){
-      //   this.dialog.type = "add";
-      //   this.dialog.isVisible = true;
-      //   this.$refs.edit.setUser(false,this.orgList,this.user.orgId,this.dicts);
-      // },
+      add(){
+        this.dialog.type = "add";
+        this.dialog.isVisible = true;
+        this.$refs.edit.setUser(false,this.orgList,this.user.orgId,this.dicts);
+      },
       disposeData(){
         let data = JSON.parse(JSON.stringify(this.queryParams));
         delete data.model.filed;
         if (!data.model.company.key) delete data.model.company;
         if (!data.model.departMent.key) delete data.model.departMent;
-        if (!data.model.personnelType.key) delete data.model.personnelType;
-        if (!data.model.post.key) delete data.model.post;
-        if (!data.model.isAbnormal.key) delete data.model.isAbnormal;
-        if (!data.model.checkType.key) delete data.model.checkType;
-        if (!data.model.sex.code) delete data.model.sex;
         return data;
       },
       // 导出excel
@@ -666,24 +505,6 @@
           const res = response.data;
           this.preview.isVisible = true;
           this.preview.context = res.data;
-        });
-      },
-      // 新增表格
-      addExcel(){
-
-      },
-      // 更新表格
-      updateExcel(){
-
-      },
-      // 模板下载
-      stencilExcel(){
-        let queryParam = this.disposeData();
-        queryParam.map.fileName = '检测后人员信息汇总模板'
-        queryParam.page = 0;
-        queryParam.size = 0;
-        afterPerInforApi.export(queryParam).then(response => {
-          downloadFile(response);
         });
       },
       // 返回上一个页面

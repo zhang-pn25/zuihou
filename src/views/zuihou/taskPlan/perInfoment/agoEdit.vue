@@ -544,9 +544,8 @@
         this.$refs.form.resetFields();
       },
       submitForm() {
-        const vm = this;
+        let vm = this;
         this.$refs.form.validate((valid) => {
-          console.log(valid);
           if (valid) {
             vm.editSubmit();
           } else {
@@ -569,7 +568,7 @@
       },
       save(list) {
         const vm = this;
-        perInforApi.beforPersonnel(list).then((response) => {
+        perInforApi.afterPersonnel(list).then((response) => {
           const res = response.data;
           console.log(res.data);
           if (res.isSuccess) {
@@ -586,7 +585,7 @@
         list.company.data = {};
         list.departMent.data = {};
         list.post.data = {};
-        perInforApi.beforUpdatePersonnel(list).then((response) => {
+        perInforApi.afterUpdatePersonnel(list).then((response) => {
           const res = response.data;
           if (res.isSuccess) {
             this.isVisible = false;

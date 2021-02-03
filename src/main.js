@@ -3,9 +3,8 @@ import Vue from 'vue'
 import 'normalize.css/normalize.css' // a modern alternative to CSS resets
 import Element from 'element-ui'
 import './styles/element-variables.scss'
-
 import '@/styles/index.scss' // global css
-
+import {setCookie, getCookie, delCookie} from './utils/cookieVal.js';
 import App from './App'
 import store from './store'
 import router from './router'
@@ -17,6 +16,7 @@ import request from '@/utils/request'
 
 import * as filters from './filters' // global filters
 import { hasPermission, hasNoPermission, hasAnyPermission } from './utils/permissionDirect'
+import {use} from "element-ui/src/locale";
 
 Vue.directive("input-limit", {
   bind(el, binding) {
@@ -129,7 +129,7 @@ Vue.prototype.$delete = request.delete
 Vue.prototype.$download = request.download
 Vue.prototype.$upload = request.upload
 Vue.prototype.$login = request.login
-
+Vue.prototype.$setCookie = setCookie
 // register global utility filters
 Object.keys(filters).forEach(key => {
   Vue.filter(key, filters[key])

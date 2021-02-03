@@ -1,15 +1,26 @@
 <template>
 <div>
-    <el-cascader
-      class="filter-item search-item"
-      :props="{ value: 'id' }"
+<!--    <el-cascader-->
+<!--      class="filter-item search-item"-->
+<!--      :props="{ value: 'id' }"-->
+<!--      :options="orgList"-->
+<!--      placeholder="请选择单位部门"-->
+<!--      :show-all-levels="false"-->
+<!--      @change="orgFiled(queryParams.model.filed)"-->
+<!--      v-model="queryParams.model.filed"-->
+<!--      clearable-->
+<!--    ></el-cascader>-->
+    <treeselect
+      :clear-value-text="$t('common.clear')"
+      :load-options="loadListOptions"
+      :normalizer="normalizer"
+      :multiple="false"
       :options="orgList"
       placeholder="请选择单位部门"
-      :show-all-levels="false"
-      @change="orgFiled(queryParams.model.filed)"
+      :searchable="true"
+      class="filter-item search-item"
       v-model="queryParams.model.filed"
-      clearable
-    ></el-cascader>
+    />
     <el-select
       :multiple="false"
       clearable
@@ -28,7 +39,7 @@
     <el-select class="filter-item search-item" clearable placeholder="请输入人员类别" v-model="queryParams.model.personnelType.key" value>
       <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
     </el-select>
-    <div style="display: inline" v-show = 'seniorHidden'>
+    <div style="display: inline" v-show = 'seniorType'>
       <el-select class="filter-item search-item" clearable v-model="queryParams.model.sex.code" placeholder="请选择性别">
         <el-option
           v-for="item in genderData"
@@ -52,7 +63,7 @@
     <el-button @click="reset" class="filter-item" plain type="warning">
       {{ $t("table.reset") }}
     </el-button>
-    <el-button @click="add" class="filter-item" plain type="danger" v-has-permission="['user:add']">
+    <el-button @click="add" :disabled="!this.$route.query.type" class="filter-item" plain type="danger" v-has-permission="['user:add']">
       {{ $t("table.add") }}
     </el-button>
     <el-button type="info" plain @click="returnPage" class="filter-item">返回</el-button>
@@ -72,7 +83,7 @@
           导出
         </el-dropdown-item>
         <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:delete']">
-          导出预览
+          导入预览
         </el-dropdown-item>
         <el-dropdown-item @click.native="addExcel" v-has-permission="['user:export']">
           新增
@@ -85,7 +96,7 @@
         </el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
-    <el-button type="primary" @click="seniorSearch()" plain class="filter-item" icon="el-icon-search">高级搜索</el-button>
+  <el-button type="primary" plain class="filter-item" @click="seniorChange" :icon="seniorSearch.icon">{{seniorSearch.text}}</el-button>
   <el-table
     :data="tableData.records"
     :key="tableKey"
@@ -324,6 +335,20 @@
     @success="editSuccess"
     ref="edit"
   />
+  <preview-data
+    :dialog-visible="previewAgo.isVisible"
+    @close="previewClose"
+    @success="previewSuccess"
+    ref="preview"
+  />
+  <file-import
+    :dialog-visible="fileImport.isVisible"
+    :type="fileImport.type"
+    :action="fileImport.action" accept=".xls,.xlsx"
+    @close="importClose"
+    @success="importSuccess"
+    ref="import"
+  />
   <el-dialog
     :close-on-click-modal="false"
     :close-on-press-escape="true"
@@ -343,15 +368,20 @@
 
 <script>
   import Edit from "./agoEdit";
+  import Treeselect from "@riophae/vue-treeselect";
+  import "@riophae/vue-treeselect/dist/vue-treeselect.css";
+  import previewData from "./previewData";
   import orgApi from '@/api/Org.js'
   import perInforApi from "@/api/perInfor.js";
-  import { initQueryParams,downloadFile ,initDicts ,getDictsKey} from '@/utils/commons';
+  import FileImport from "@/components/zuihou/Import"
+  import { initQueryParams,downloadFile ,getDictsKey ,assignment} from '@/utils/commons';
   import Pagination from "@/components/Pagination";
   import stationApi from "@/api/Station.js";
   import elDragDialog from '@/directive/el-drag-dialog';
+  import afterPerInforApi from "@/api/afterPerInfor.js";
     export default {
-        name: "summaryAgo.vue",
-      components:{Edit,Pagination},
+      name: "summaryAgo.vue",
+      components:{Edit,Pagination,previewData,FileImport,Treeselect},
       directives: { elDragDialog },
       data(){
         return{
@@ -361,6 +391,11 @@
             total: 0
           },
           orgList:[],
+          fileImport: {
+            isVisible: false,
+            type: "import",
+            action: `${process.env.VUE_APP_BASE_API}/nucleic/beforPersonnel/import`,
+          },
           queryParams:initQueryParams({
               model:{
                 "accountingTestTaskId": this.$route.query.id,
@@ -388,14 +423,18 @@
                   "desc": ""
                 },
                 "status": true,
-                filed:[],
+                filed:null,
               }
           }),
           genderData:[
             {code:'M',label:'男'},
             {code:'W',label:'女'},
           ],
-          seniorHidden:false,
+          seniorSearch:{
+            icon:'el-icon-search',
+            text:'高级搜索'
+          },
+          seniorType:false,
           stationList:[],
           dialog: {
             isVisible: false,
@@ -404,6 +443,9 @@
           preview: {
             isVisible: false,
             context: ''
+          },
+          previewAgo:{
+            isVisible: false,
           },
           dicts:{
             PERSONNEL_TYPE:{},
@@ -419,6 +461,9 @@
           this.dicts
         );
       },
+      watch:{
+        'queryParams.model.filed':'orgFiled'
+      },
       computed: {
         user() {
           return this.$store.state.account.user;
@@ -430,24 +475,49 @@
         },
         fetch(){
           let queryParam = this.disposeData();
-          perInforApi.beforPage(queryParam).then(response =>{
+          afterPerInforApi.afterPage(queryParam).then(response =>{
             let res = response.data;
             this.tableData = res.data;
           })
         },
         // 监听部门单位数据变化
         orgFiled(val){
-          this.queryParams.model.company.key = val.length>0?val[0]:'';
-          this.queryParams.model.departMent.key = val.length>0?val[1]:'';
+          console.log(val);
+          let data = "";
+          data = assignment(
+            this.getNode(
+              this.orgList,
+              "children",
+              this.queryParams.model.filed
+            ),
+            val
+          );
+          this.queryParams.model.company.key = val ? data[0] : null;
+          this.queryParams.model.departMent.key = val ? data[1] : null;
           this.queryParams.model.post.key = '';
-          if (val.length > 0 ){
-            stationApi.findStaByIds(val[1]?val[1]:val[0]?val[0]:'').then(response => {
+          if (val){
+            stationApi.findStaByIds(data[1]?data[1]:data[0]?data[0]:'').then(response => {
               const res = response.data;
               this.stationList = res.data;
             });
           }else {
             this.stationList = [];
           }
+        },
+        importSuccess() {
+          this.search();
+        },
+        importClose() {
+          this.fileImport.isVisible = false;
+        },
+        loadListOptions({callback}) {
+          callback();
+        },
+        normalizer(node){
+          if(node.children == null){
+            delete node.children;
+          }
+          return node;
         },
         initOrg() {
           orgApi.allTree({status: true})
@@ -456,14 +526,31 @@
               this.orgList = res.data
             })
         },
-        seniorSearch(){
-          if (this.seniorHidden) this.seniorHidden = false;
-          else this.seniorHidden = true;
+        seniorChange(){
+          if (this.seniorType){
+            this.seniorType = false;
+            this.seniorSearch = {
+              icon:'el-icon-search',
+              text:'高级搜索'
+            }
+          }else {
+            this.seniorType = true;
+            this.seniorSearch = {
+              icon:'el-icon-circle-close',
+              text:'关闭'
+            }
+          }
         },
         editClose() {
           this.dialog.isVisible = false;
         },
         editSuccess() {
+          this.search();
+        },
+        previewClose(){
+          this.previewAgo.isVisible = false;
+        },
+        previewSuccess(){
           this.search();
         },
         reset(){
@@ -493,7 +580,7 @@
               "desc": ""
             },
             "status": true,
-            filed:[],
+            filed:null,
           }
           this.stationList = [];
           this.search();
@@ -534,20 +621,24 @@
         },
         // 导出预览
         exportPreviewExcel(){
-          if (this.queryParams.timeRange) {
-            this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
-            this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
-          }
-          let queryParam = this.disposeData();
-          perInforApi.preview(queryParam).then(response => {
-            const res = response.data;
-            this.preview.isVisible = true;
-            this.preview.context = res.data;
-          });
+          this.previewAgo.isVisible = true;
+          this.$refs.preview.setUser(false,this.orgList,this.user.orgId,this.dicts);
+          // if (this.queryParams.timeRange) {
+          //   this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
+          //   this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
+          // }
+          // let queryParam = this.disposeData();
+          // perInforApi.preview(queryParam).then(response => {
+          //   const res = response.data;
+          //   this.preview.isVisible = true;
+          //   this.preview.context = res.data;
+          // });
         },
         // 新增表格
         addExcel(){
-
+          this.fileImport.type = "upload";
+          this.fileImport.isVisible = true;
+          this.$refs.import.setModel(false);
         },
         // 更新表格
         updateExcel(){
@@ -570,6 +661,21 @@
         // 返回上一个页面
         returnPage() {
           this.$router.go(-1)
+        },
+        // list 要遍历的数组对象
+        // children 子节点名字
+        // value 对比的值
+        getNode(list, children, val) {
+          list.forEach((item) => {
+            if (item.id == val) {
+              this.treePath = item.treePath;
+              return item.treePath;
+            }
+            if (item[children] && item[children].length > 0) {
+              this.getNode(item[children], children, val);
+            }
+          });
+          return this.treePath;
         },
       }
     }

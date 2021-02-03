@@ -1,29 +1,75 @@
 <template>
   <div class="app-container">
     <div class="filter-container">
-      <el-input placeholder='序号'
-                class="filter-item search-item" v-model="queryParams.model.serialNumber"/>
-      <el-input placeholder='任务名称'
-                class="filter-item search-item" v-model="queryParams.model.taskName"/>
-      <el-date-picker
-        v-model="queryParams.model.beforeDeadline"
-        type="datetime"
-        placeholder="人员信息上报截止时间"
-        align="right"
-        class="filter-item search-item"
-        value-format="yyyy-MM-dd HH:mm:ss"
-        :picker-options="pickerOptions">
-      </el-date-picker>
-      <el-button @click="search" class="filter-item" plain type="primary">
-        {{ $t("table.search") }}
-      </el-button>
-      <el-button @click="reset" class="filter-item" plain type="warning">
-        {{ $t("table.reset") }}
-      </el-button>
-      <el-button @click="add" class="filter-item" plain type="danger" v-has-permission="['user:add']">
-        {{ $t("table.add") }}
-      </el-button>
-    </div>
+      <div style="display: inline">
+        <div class="titLabel" style="width: 200px">
+          <div class="titText">任务名称</div>
+          <el-input placeholder='任务名称'
+                    class="filter-item search-item" v-model="queryParams.model.taskName"/>
+        </div>
+        <div class="titLabel" style="width: 250px">
+          <div class="titText">人员信息上报截止时间</div>
+          <el-date-picker
+            v-model="queryParams.model.beforeDeadline"
+            type="daterange"
+            range-separator="至"
+            class="filter-item search-item date-range-item"
+            start-placeholder="开始日期"
+            value-format="yyyy-MM-dd"
+            end-placeholder="结束日期">
+          </el-date-picker>
+        </div>
+        <div class="titLabel" v-show="seniorType" style="width: 250px">
+          <div class="titText">检测开始时间</div>
+          <el-date-picker
+            v-model="queryParams.model.beforeDeadline"
+            type="daterange"
+            range-separator="至"
+            class="filter-item search-item date-range-item"
+            start-placeholder="开始日期"
+            value-format="yyyy-MM-dd"
+            end-placeholder="结束日期">
+          </el-date-picker>
+        </div>
+        <div class="titLabel" v-show="seniorType" style="width: 250px">
+          <div class="titText">检测结束时间</div>
+          <el-date-picker
+            v-model="queryParams.model.beforeDeadline"
+            type="daterange"
+            range-separator="至"
+            class="filter-item search-item date-range-item"
+            start-placeholder="开始日期"
+            value-format="yyyy-MM-dd"
+            end-placeholder="结束日期">
+          </el-date-picker>
+        </div>
+        <div class="titLabel" v-show="seniorType" style="width: 250px">
+          <div class="titText">检测结果上报截止时间</div>
+          <el-date-picker
+            v-model="queryParams.model.beforeDeadline"
+            type="daterange"
+            range-separator="至"
+            value-format="yyyy-MM-dd"
+            class="filter-item search-item date-range-item"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期">
+          </el-date-picker>
+        </div>
+      </div>
+      <div style="display: inline;">
+        <el-button @click="search" class="filter-item" plain type="primary">
+          {{ $t("table.search") }}
+        </el-button>
+        <el-button @click="reset" class="filter-item" plain type="warning">
+          {{ $t("table.reset") }}
+        </el-button>
+        <el-button @click="add" class="filter-item" plain type="danger" v-has-permission="['user:add']">
+          {{ $t("table.add") }}
+        </el-button>
+        <el-button type="primary" plain class="filter-item" @click="seniorChange" :icon="seniorSearch.icon">{{seniorSearch.text}}</el-button>
+      </div>
+      </div>
+
     <el-table
       :data="tableData.records"
       :key="tableKey"
@@ -123,7 +169,7 @@
             @click="view(row)"
             class="el-icon-view table-operation"
             style="color: #87d068;"
-            title="修改"
+            title="查看"
             v-hasPermission="['role:update']"
           />
           <i
@@ -154,7 +200,7 @@
       @success="editSuccess"
       ref="edit"
     />
-  </div>
+    </div>
 </template>
 <script>
   import Pagination from "@/components/Pagination";
@@ -190,9 +236,13 @@
             }
           }]
         },
-
         queryParams: initQueryParams(),
         selection: [],
+        seniorSearch:{
+          icon:'el-icon-search',
+          text:'高级搜索'
+        },
+        seniorType:false,
         tableKey: 0,
         loading: false,
         tableData: {
@@ -252,6 +302,21 @@
           query:row
         })
       },
+      seniorChange(){
+        if (this.seniorType){
+          this.seniorType = false;
+          this.seniorSearch = {
+            icon:'el-icon-search',
+              text:'高级搜索'
+          }
+        }else {
+          this.seniorType = true;
+          this.seniorSearch = {
+            icon:'el-icon-circle-close',
+            text:'关闭'
+          }
+        }
+      },
       clearSelections() {
         this.$refs.table.clearSelection();
       },
@@ -309,5 +374,22 @@
 <style lang="scss" scoped>
   .item {
     margin-top: 7px;
+  }
+  .date-range-item {
+    width: 250px;
+    >>> .el-range-separator{
+      width: 11%;
+    }
+  }
+  .titLabel{
+    display: inline-block;
+    margin: 0px 2px;
+    .titText{
+      display: inline-block;
+      width: 100%;
+      font-size: 14px;
+      color: #5A5E66;
+      margin: 0px 0px 5px 4px;
+    }
   }
 </style>

@@ -3,9 +3,9 @@
   <div class="app-container">
     <div class="filter-container">
       <el-row style="border-bottom: 1px solid #D6D8DE">
-        <el-col :span="12">
+        <el-col :span="14">
           <el-row>
-            <el-col :span="5" v-for="(item,index) in tabList" :key="index">
+            <el-col :span="4" v-for="(item,index) in tabList" :key="index">
               <div class="tab_Moda" @click="toggleTab(item.path,index)">
                 <span class="tab_text" :class="item.path == cut?'isActive':''">
                   {{item.name}}
@@ -14,9 +14,14 @@
             </el-col>
           </el-row>
         </el-col>
-        <el-col :span="12">
+        <el-col :span="10">
           <div style="float: right;">
-            <span style="font-size: 16px;margin-top: 13px;display: block">距离<label style="color: red">核酸检测</label>任务的检测结果上报截止时间还有<label style="color: red">{{day}}</label>天<label style="color: red">{{hour}}</label>时<label style="color: red">{{min}}</label>分<label style="color: red">{{second}}</label>秒，请尽快上传</span>
+            <div v-if="this.$route.query.type == true">
+              <span style="font-size: 16px;margin-top: 13px;display: block">距离<label style="color: red">核酸检测</label>任务的检测结果上报截止时间还有<label style="color: red">{{day}}</label>天<label style="color: red">{{hour}}</label>时<label style="color: red">{{min}}</label>分<label style="color: red">{{second}}</label>秒，请尽快上传</span>
+            </div>
+            <div v-else>
+              <el-button  class="filter-item" style="margin-bottom: 5px" plain type="danger" v-has-permission="['user:add']">重新激活</el-button>
+            </div>
           </div>
         </el-col>
       </el-row>
@@ -39,6 +44,7 @@
   import summaryAfter from './summaryAfter';
   import statisticalAgo from "./statisticalAgo";
   import summaryAgo from './summaryAgo';
+  // import summaryRecord from './summaryRecord';
   import statisticalAfter from "./statisticalAfter";
     export default {
         name: "Index",
@@ -55,6 +61,7 @@
             isVisible: false,
             context: ''
           },
+          btnType:false,
           curStartTime: '',
           day: '0',
           hour: '00',
@@ -63,6 +70,7 @@
           tabList:[
             {path:'summaryAgo',name:'人员信息汇总-检测前'},
             {path:'summaryAfter',name:'人员信息汇总-检测后'},
+            // {path:'summaryRecord',name:'人员信息检测记录'},
             {path:'statisticalAgo',name:'人员信息统计-检测前'},
             {path:'statisticalAfter',name:'人员信息统计-检测后'}
             ],
@@ -76,6 +84,15 @@
       created() {
         this.curStartTime = this.$route.query.afterDeadline;
         this.countTime()
+      },
+      computed: {
+        user() {
+          return this.$store.state.account.user;
+        },
+      },
+      mounted() {
+        this.$setCookie('org',this.user.orgId);
+        this.$setCookie('task',this.$route.query.id);
       },
       methods:{
         handleClick(tab, event) {
@@ -114,8 +131,10 @@
           }
           // 等于0的时候不调用
           if (Number(this.hour) === 0 && Number(this.day) === 0 && Number(this.min) === 0 && Number(this.second) === 0) {
+            this.$route.query.type = false;
             return
           } else {
+            this.$route.query.type = true;
             // 递归每秒调用countTime方法，显示动态时间效果,
             setTimeout(this.countTime, 1000)
           }

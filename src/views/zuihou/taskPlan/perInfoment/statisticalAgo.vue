@@ -136,6 +136,7 @@
 
 <script>
   import perInforApi from "@/api/perInfor.js";
+  import afterPerInforApi from "@/api/afterPerInfor.js";
   export default {
     name: "statisticalAgo.vue",
     data(){
@@ -174,7 +175,7 @@
       fetch(){
         let data = JSON.parse(JSON.stringify(this.queryParams));
         data.orgId = this.user.orgId;
-        perInforApi.beforStatisticalPage(data).then(response =>{
+        afterPerInforApi.afterStatisticalPage(data).then(response =>{
           let res = response.data;
           this.tableData = res.data;
         })
