@@ -74,35 +74,35 @@
 <!--      {{ $t("table.add") }}-->
 <!--    </el-button>-->
     <el-button type="info" plain @click="returnPage" class="filter-item">返回</el-button>
-    <el-dropdown class="filter-item" trigger="click"
-                 v-has-any-permission="[
-            'user:delete',
-            'user:rest',
-            'user:export',
-            'user:import',
-          ]">
-      <el-button>
-        {{ $t("table.more") }}
-        <i class="el-icon-arrow-down el-icon--right"/>
-      </el-button>
-      <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item @click.native="exportExcel" v-has-permission="['user:delete']">
-          导出
-        </el-dropdown-item>
-        <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:delete']">
-          导出预览
-        </el-dropdown-item>
-        <el-dropdown-item @click.native="addExcel" v-has-permission="['user:export']">
-          新增
-        </el-dropdown-item>
-        <el-dropdown-item @click.native="updateExcel" v-has-permission="['user:export']">
-          更新
-        </el-dropdown-item>
-        <el-dropdown-item @click.native="stencilExcel" v-has-permission="['user:import']">
-          模板下载
-        </el-dropdown-item>
-      </el-dropdown-menu>
-    </el-dropdown>
+<!--    <el-dropdown class="filter-item" trigger="click"-->
+<!--                 v-has-any-permission="[-->
+<!--            'user:delete',-->
+<!--            'user:rest',-->
+<!--            'user:export',-->
+<!--            'user:import',-->
+<!--          ]">-->
+<!--      <el-button>-->
+<!--        {{ $t("table.more") }}-->
+<!--        <i class="el-icon-arrow-down el-icon&#45;&#45;right"/>-->
+<!--      </el-button>-->
+<!--      <el-dropdown-menu slot="dropdown">-->
+<!--        <el-dropdown-item @click.native="exportExcel" v-has-permission="['user:delete']">-->
+<!--          导出-->
+<!--        </el-dropdown-item>-->
+<!--        <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:delete']">-->
+<!--          导出预览-->
+<!--        </el-dropdown-item>-->
+<!--        <el-dropdown-item @click.native="addExcel" v-has-permission="['user:export']">-->
+<!--          新增-->
+<!--        </el-dropdown-item>-->
+<!--        <el-dropdown-item @click.native="updateExcel" v-has-permission="['user:export']">-->
+<!--          更新-->
+<!--        </el-dropdown-item>-->
+<!--        <el-dropdown-item @click.native="stencilExcel" v-has-permission="['user:import']">-->
+<!--          模板下载-->
+<!--        </el-dropdown-item>-->
+<!--      </el-dropdown-menu>-->
+<!--    </el-dropdown>-->
     <el-button type="primary" plain class="filter-item" @click="seniorChange" :icon="seniorSearch.icon">{{seniorSearch.text}}</el-button>
     <el-table
       :data="tableData.records"

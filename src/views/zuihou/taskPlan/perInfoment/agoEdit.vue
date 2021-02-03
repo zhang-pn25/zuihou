@@ -345,6 +345,7 @@
           sex:{
             code:'',
           },
+          isActivation:false,
           personnelType:{
             key:'',
           },
@@ -530,6 +531,7 @@
             key:'',
             data:{}
           },
+          isActivation:false,
           sex:{
             code:'',
           },
