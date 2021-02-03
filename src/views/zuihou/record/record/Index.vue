@@ -22,8 +22,6 @@
     <el-button type="info" plain @click="returnPage" class="filter-item">返回</el-button>
     <el-dropdown class="filter-item" trigger="click"
                  v-has-any-permission="[
-            'user:delete',
-            'user:rest',
             'user:export',
             'user:import',
           ]">
@@ -32,10 +30,10 @@
         <i class="el-icon-arrow-down el-icon--right"/>
       </el-button>
       <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item @click.native="exportExcel" v-has-permission="['user:delete']">
+        <el-dropdown-item @click.native="exportExcel" v-has-permission="['user:export']">
           导出
         </el-dropdown-item>
-        <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:delete']">
+        <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:import']">
           导出预览
         </el-dropdown-item>
       </el-dropdown-menu>
@@ -63,7 +61,7 @@
         prop="company"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.company.data?scope.row.company.data.label:'' }}</span>
+          <span>{{ scope.row.company.data?scope.row.company.data:'' }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -74,7 +72,7 @@
         prop="departMent"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.departMent.data?scope.row.departMent.data.label:'' }}</span>
+          <span>{{ scope.row.departMent.data?scope.row.departMent.data:'' }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -85,7 +83,7 @@
         prop="post"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.post.data?scope.row.post.data.name:'' }}</span>
+          <span>{{ scope.row.post.data?scope.row.post.data:'' }}</span>
         </template>
       </el-table-column>
       <el-table-column

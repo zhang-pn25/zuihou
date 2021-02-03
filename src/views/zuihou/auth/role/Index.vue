@@ -155,7 +155,7 @@
           <i
             @click="edit(row)"
             class="el-icon-edit table-operation"
-            style="color: #2db7f5;"
+            style="color: #021E8C;"
             title="修改"
             v-hasPermission="['role:update']"
           />

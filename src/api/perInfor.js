@@ -3,7 +3,7 @@ import axiosApi from './AxiosApi.js'
 const apiList = {
   export:{
     method:'POST',
-    url:`/nucleic/beforPersonnel/exportExcelReWrite`
+    url:`/nucleic/afterPersonnel/exportExcelReWrite`
   },
   beforeImport:{
     method:'POST',
@@ -25,6 +25,10 @@ const apiList = {
     method:'POST',
     url:`/nucleic/beforPersonnel/queryPage`
   },
+  updatePersonnel:{
+    method:'PUT',
+    url:`/nucleic/afterPersonnel/updatePersonnel`
+  },
   afterStatisticalPage:{
     method:'POST',
     url:`/nucleic/afterPersonnel/findStatisticsInfo`
@@ -38,7 +42,7 @@ const apiList = {
   cancelSaveBach:{
     method:'POST',
     url:`/nucleic/beforPersonnel/cancelSaveBach`
-  }
+  },
 }
 
 export default {
@@ -58,6 +62,12 @@ export default {
   preview(data){
     return axiosApi({
       ...apiList.preview,
+      data
+    })
+  },
+  updatePersonnel(data){
+    return axiosApi({
+      ...apiList.updatePersonnel,
       data
     })
   },

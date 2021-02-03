@@ -17,7 +17,7 @@
         <el-col :span="10">
           <div style="float: right;">
             <div v-if="this.$route.query.type == true">
-              <span style="font-size: 16px;margin-top: 13px;display: block">距离<label style="color: red">核酸检测</label>任务的检测结果上报截止时间还有<label style="color: red">{{day}}</label>天<label style="color: red">{{hour}}</label>时<label style="color: red">{{min}}</label>分<label style="color: red">{{second}}</label>秒，请尽快上传</span>
+              <span style="font-size: 16px;margin-top: 13px;display: block">距离<label style="color: red">{{this.$route.query.taskName}}</label>任务的检测结果上报截止时间还有<label style="color: red">{{day}}</label>天<label style="color: red">{{hour}}</label>时<label style="color: red">{{min}}</label>分<label style="color: red">{{second}}</label>秒，请尽快上传</span>
             </div>
             <div v-else>
               <el-button  class="filter-item" style="margin-bottom: 5px" plain type="danger" v-has-permission="['user:add']">重新激活</el-button>

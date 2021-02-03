@@ -471,7 +471,7 @@
               res.data.userInfo.data["refreshToken"],
               res.data.userInfo.data["expiration"]
             );
-            that.saveUserInfo(res.data.userInfo.data, res.data.orgId);
+            that.saveUserInfo(res.data.userInfo.data, res.data.orgId,res.data.roleCode);
             that.getResource();
           } else {
             that.getCodeImage();
@@ -483,10 +483,11 @@
         this.$store.commit("account/setRefreshToken", refreshToken);
         this.$store.commit("account/setExpireTime", expiration);
       },
-      saveUserInfo(user,orgId) {
+      saveUserInfo(user,orgId,code) {
         this.$store.commit("account/setUser", {
           id: user.userId,
           account: user.account,
+          code:code,
           name: user.name,
           avatar: user.avatar,
           workDescribe: user.workDescribe,

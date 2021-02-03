@@ -107,6 +107,7 @@
     <el-table
       :data="tableData.records"
       :key="tableKey"
+      class="testTable"
       border fit row-key="id"
       ref="table"
       style="width: 100%;margin-top: 10px"
@@ -292,56 +293,114 @@
       </el-table-column>
       <el-table-column
         label="检测时间"
-        :show-overflow-tooltip="true"
         align="center"
-        width="120"
+        width="170"
         prop="checkTime"
       >
+        <template slot-scope="{row}">
+          <el-date-picker
+            v-model="row.checkTime"
+            type="date"
+            placeholder="检测时间"
+            align="right"
+            @change ='update(row,1)'
+            style="width: 100%"
+            value-format="yyyy-MM-dd"
+          >
+          </el-date-picker>
+        </template>
       </el-table-column>
       <el-table-column
         label="检测结果"
         :show-overflow-tooltip="true"
         align="center"
-        width="120"
+        width="150"
         prop="checkResult"
       >
-      </el-table-column>
-      <el-table-column
-        label="检测途径"
-        :show-overflow-tooltip="true"
-        align="center"
-        width="120"
-        prop="checkChannel"
-      >
+        <template slot-scope="scope">
+          <el-input
+            placeholder="检测结果"
+            @change ='update(scope.row,2)'
+            style="width: 100%"
+            v-model="scope.row.checkResult"
+          >
+          </el-input>
+        </template>
       </el-table-column>
       <el-table-column
         label="是否异常"
         :show-overflow-tooltip="true"
         align="center"
-        width="120"
+        width="140"
         prop="isAbnormal"
       >
         <template slot-scope="{row}">
-          <span>
-            {{ row.isAbnormal | isAbnormalFilter }}
-          </span>
+          <el-select style="width: 100%" @change ='update(row,3)' v-model="row.isAbnormal" placeholder="是否异常">
+            <el-option
+              v-for="item in isAbnormalList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="检测途径"
+        :show-overflow-tooltip="true"
+        align="center"
+        width="180"
+        prop="checkChannel"
+      >
+        <template slot-scope="{row}">
+          <el-input
+            @change ='update(row,4)'
+            placeholder="检测途径"
+            type="textarea"
+            :rows="2"
+            style="width: 100%"
+            v-model="row.checkChannel"
+            clearable
+          />
         </template>
       </el-table-column>
       <el-table-column
         label="未检测原因"
         :show-overflow-tooltip="true"
         align="center"
-        width="120"
+        width="180"
         prop="notDetectedReason"
       >
+        <template slot-scope="{row}">
+          <el-input
+            @change ='update(row,5)'
+            placeholder="未检测原因"
+            type="textarea"
+            :rows="2"
+            style="width: 100%"
+            v-model="row.notDetectedReason"
+            clearable
+          />
+        </template>
       </el-table-column>
       <el-table-column
         label="结果证明"
         :show-overflow-tooltip="true"
         align="center"
-        width="120"
+        width="180"
         prop="checkResultProve"
       >
+        <template slot-scope="{row}">
+          <el-input
+            placeholder="结果证明"
+            @change ='update(row,6)'
+            type="textarea"
+            :rows="2"
+            style="width: 100%"
+            v-model="row.checkResultProve"
+            clearable
+          />
+        </template>
       </el-table-column>
       <el-table-column
         label="个人签名"
@@ -370,7 +429,7 @@
 <!--          <i-->
 <!--            @click="edit(row)"-->
 <!--            class="el-icon-edit table-operation"-->
-<!--            style="color: #2db7f5;"-->
+<!--            style="color: #021E8C;"-->
 <!--            title="修改"-->
 <!--            v-hasPermission="['role:update']"-->
 <!--          />-->
@@ -676,6 +735,27 @@
       updateExcel(){
 
       },
+      // 数据更新
+      update(row,val){
+        let list = JSON.parse(JSON.stringify(row))
+        list.company.data = {};
+        list.departMent.data = {};
+        list.post.data = {};
+        afterPerInforApi.afterUpdatePersonnel(list).then((response) => {
+          const res = response.data;
+          if (res.isSuccess) {
+            this.isVisible = false;
+            this.$message({
+              message: this.$t("tips.updateSuccess"),
+              type: "success",
+            });
+            this.$emit("success");
+          }else {
+            this.search();
+          }
+        });
+
+      },
       // 模板下载
       stencilExcel(){
         let queryParam = this.disposeData();
@@ -718,6 +798,14 @@
   }
 </script>
 
-<style scoped>
-
+<style lang="scss" scoped>
+  .testTable {
+  >>> .el-input__inner{
+    text-align: center !important;
+    padding: 0px 5px !important;
+  }
+  >>> .el-form-item{
+    margin-bottom: 0px;
+  }
+  }
 </style>

@@ -33,6 +33,10 @@ const apiList = {
     method: 'POST',
     url:`/authority/dictionaryItem/findStandardType`,
   },
+  findCompany: {
+    method: 'GET',
+    url:`/authority/org/findCompany`,
+  },
 }
 
 export default {
@@ -91,4 +95,10 @@ export default {
       data
     })
   },
+  findCompany(data){
+    return axiosApi({
+      ...apiList.findCompany,
+      data
+    })
+  }
 }

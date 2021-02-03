@@ -1,5 +1,6 @@
 import commonApi from '@/api/Common'
 import stationApi from '@/api/Station'
+import dictionaryItemApi from '@/api/DictionaryItem.js'
 
 export const loadEnums = (codes, enums = {}) => {
   if (typeof (codes) === 'string') {

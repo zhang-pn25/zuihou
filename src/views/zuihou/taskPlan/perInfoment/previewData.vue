@@ -139,7 +139,7 @@
       >
         <template slot-scope="scope">
           <el-form-item :prop=" 'tableData.' + scope.$index + '.sex.desc' " :rules="rules.sex">
-            <el-select style="width: 100%" @change="updateRow(scope.row)" v-model="scope.row.sex.desc" placeholder="性别">
+            <el-select style="width: 100%" @change="updateRow(scope.row)" v-model="scope.row.sex.code" placeholder="性别">
               <el-option
                 v-for="item in genderData"
                 :key="item.code"
@@ -152,7 +152,6 @@
       </el-table-column>
       <el-table-column
         label="出生年月"
-        :show-overflow-tooltip="true"
         align="center"
         width="150"
         prop="dateOfBirth"
@@ -574,6 +573,8 @@
               message: this.$t("tips.updateSuccess"),
               type: "success",
             });
+          }else {
+            this.fetch()
           }
         });
       },
@@ -596,7 +597,13 @@
       },
       setUser(org ,list,orgID,dicts) {
         this.orgList = list;
-        this.fetch();
+        let data = JSON.parse(JSON.stringify(org))
+        for (let item of data){
+          item.filed = [item.company?item.company.key:'',item.departMent?item.departMent.key:''];
+          item.stationList = [{id:item.post.key,name:item.post.data}];
+          item.checkTypeBtn = false;
+        }
+        this.form.tableData = data;
         this.dicts = { ...dicts };
         // this.summaryData.orgId = orgID;
       },
@@ -621,7 +628,10 @@
       editSubmit() {
         perInforApi.determineSaveBach().then(response =>{
             let res = response.data;
-            console.log(res);
+            if (res.data){
+              this.isVisible = false;
+              this.$emit("success");
+            }
         })
         // const vm = this;
         // let data = JSON.parse(JSON.stringify(this.summaryData));
@@ -639,7 +649,10 @@
         // this.isVisible = false;
         perInforApi.cancelSaveBach().then(response =>{
           let res = response.data;
-          console.log(res);
+          if (res.data){
+            this.isVisible = false;
+            this.$emit("success");
+          }
         })
       },
       save(list) {

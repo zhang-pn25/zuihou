@@ -587,7 +587,7 @@
         list.company.data = {};
         list.departMent.data = {};
         list.post.data = {};
-        perInforApi.afterUpdatePersonnel(list).then((response) => {
+        perInforApi.updatePersonnel(list).then((response) => {
           const res = response.data;
           if (res.isSuccess) {
             this.isVisible = false;

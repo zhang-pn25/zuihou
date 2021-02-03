@@ -63,35 +63,30 @@
     <el-button @click="reset" class="filter-item" plain type="warning">
       {{ $t("table.reset") }}
     </el-button>
-    <el-button @click="add" :disabled="!this.$route.query.type" class="filter-item" plain type="danger" v-has-permission="['user:add']">
+    <el-button @click="add" :disabled="!this.$route.query.type" class="filter-item" plain type="danger">
       {{ $t("table.add") }}
     </el-button>
     <el-button type="info" plain @click="returnPage" class="filter-item">返回</el-button>
     <el-dropdown class="filter-item" trigger="click"
-                 v-has-any-permission="[
-            'user:delete',
-            'user:rest',
-            'user:export',
-            'user:import',
-          ]">
+                >
       <el-button>
         {{ $t("table.more") }}
         <i class="el-icon-arrow-down el-icon--right"/>
       </el-button>
       <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item @click.native="exportExcel" v-has-permission="['user:delete']">
-          导出
+<!--        <el-dropdown-item @click.native="exportExcel" v-has-permission="['user:delete']">-->
+<!--          导出-->
+<!--        </el-dropdown-item>-->
+<!--        <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:delete']">-->
+<!--          导入预览-->
+<!--        </el-dropdown-item>-->
+        <el-dropdown-item @click.native="addExcel">
+          导入
         </el-dropdown-item>
-        <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:delete']">
-          导入预览
-        </el-dropdown-item>
-        <el-dropdown-item @click.native="addExcel" v-has-permission="['user:export']">
-          新增
-        </el-dropdown-item>
-        <el-dropdown-item @click.native="updateExcel" v-has-permission="['user:export']">
-          更新
-        </el-dropdown-item>
-        <el-dropdown-item @click.native="stencilExcel" v-has-permission="['user:import']">
+<!--        <el-dropdown-item @click.native="updateExcel" v-has-permission="['user:export']">-->
+<!--          新增-->
+<!--        </el-dropdown-item>-->
+        <el-dropdown-item @click.native="stencilExcel">
           模板下载
         </el-dropdown-item>
       </el-dropdown-menu>
@@ -310,9 +305,14 @@
         <i
           @click="edit(row)"
           class="el-icon-edit table-operation"
-          style="color: #2db7f5;"
+          style="color: #021E8C;"
           title="修改"
-          v-hasPermission="['role:update']"
+        />
+        <i
+          @click="discover(row)"
+          class="el-icon-discover table-operation"
+          style="color: #DD5145;"
+          title="调整"
         />
         <el-link class="no-perm" v-has-no-permission="['loginLog:delete']">{{
           $t("tips.noPermission")
@@ -505,7 +505,23 @@
           }
         },
         importSuccess() {
-          this.search();
+          let data = initQueryParams({
+            model:{
+              // "accountingTestTaskId": this.$route.query.id,
+              "isDelete": true,
+              "status": true,
+            },
+            size:'-1'
+          })
+          perInforApi.beforePage(data).then(response => {
+            let res = response.data;
+            if (res.isSuccess){
+              if (res.data.records && res.data.records.length>0){
+                this.previewAgo.isVisible = true;
+                this.$refs.preview.setUser(res.data.records,this.orgList,this.user.orgId,this.dicts);
+              }
+            }
+          })
         },
         importClose() {
           this.fileImport.isVisible = false;
@@ -525,6 +541,9 @@
               const res = response.data
               this.orgList = res.data
             })
+        },
+        discover(){
+
         },
         seniorChange(){
           if (this.seniorType){
@@ -619,30 +638,11 @@
             downloadFile(response);
           });
         },
-        // 导出预览
-        exportPreviewExcel(){
-          this.previewAgo.isVisible = true;
-          this.$refs.preview.setUser(false,this.orgList,this.user.orgId,this.dicts);
-          // if (this.queryParams.timeRange) {
-          //   this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
-          //   this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
-          // }
-          // let queryParam = this.disposeData();
-          // perInforApi.preview(queryParam).then(response => {
-          //   const res = response.data;
-          //   this.preview.isVisible = true;
-          //   this.preview.context = res.data;
-          // });
-        },
         // 新增表格
         addExcel(){
           this.fileImport.type = "upload";
           this.fileImport.isVisible = true;
           this.$refs.import.setModel(false);
-        },
-        // 更新表格
-        updateExcel(){
-
         },
         // 模板下载
         stencilExcel(){

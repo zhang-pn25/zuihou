@@ -77,7 +77,7 @@
         <el-table-column :label="$t('table.operation')"  column-key="operation" sortable="custom" align="center" class-name="small-padding fixed-width"
                          width="100px">
           <template slot-scope="{row}">
-            <i @click="edit(row)" class="el-icon-edit table-operation" style="color: #2db7f5;"
+            <i @click="edit(row)" class="el-icon-edit table-operation" style="color: #021E8C;"
                v-hasPermission="['dict:update']"/>
             <i @click="singleDelete(row)" class="el-icon-delete table-operation" style="color: #f50;"
                v-hasPermission="['dict:delete']"/>

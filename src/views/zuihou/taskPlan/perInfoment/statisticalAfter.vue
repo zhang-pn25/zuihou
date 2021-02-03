@@ -1,13 +1,28 @@
 <template>
   <div>
-<!--    <el-input placeholder='请选择单位' class="filter-item search-item" v-model="queryParams.serialNumber"/>-->
-<!--    <el-button @click="search" class="filter-item" plain type="primary">-->
-<!--      {{ $t("table.search") }}-->
-<!--    </el-button>-->
-<!--    <el-button @click="reset" class="filter-item" plain type="warning">-->
-<!--      {{ $t("table.reset") }}-->
-<!--    </el-button>-->
-<!--    <el-button type="info" plain @click="returnPage" class="filter-item">返回</el-button>-->
+    <div v-show="this.user.code != 'SECONDARY_USER'">
+      <el-select
+        :multiple="false"
+        clearable
+        class="filter-item search-item"
+        placeholder="请选择单位"
+        v-model="queryParams.compan"
+      >
+        <el-option
+          :key="item.id"
+          :label="item.label"
+          :value="item.id"
+          v-for="item in unitList"
+        />
+      </el-select>
+      <el-button @click="search" class="filter-item" plain type="primary">
+        {{ $t("table.search") }}
+      </el-button>
+      <el-button @click="reset" class="filter-item" plain type="warning">
+        {{ $t("table.reset") }}
+      </el-button>
+      <el-button type="info" plain @click="returnPage" class="filter-item">返回</el-button>
+    </div>
     <el-table
       :data="tableData"
       :key="tableKey"
@@ -140,6 +155,7 @@
 </template>
 
 <script>
+  import stationApi from "@/api/Station.js";
   import afterPerInforApi from "@/api/afterPerInfor.js";
   export default {
     name: "statisticalAfter.vue",
@@ -152,15 +168,18 @@
           accountingTestTaskId: this.$route.query.id,
           sj:'105',
           dw:'106',
+          isMove:true,
           sjzt:'101',
           sjzb:'102',
           sjfj:'103',
           sjls:'104',
         },
+        unitList:[],
       }
     },
     mounted() {
       this.search();
+      this.findCompany();
     },
     computed: {
       user() {
@@ -179,8 +198,26 @@
           this.tableData = res.data;
         })
       },
+      findCompany(){
+        stationApi.findCompany().then(response =>{
+          let res = response.data;
+          if (res.data && res.data.length){
+            this.unitList = res.data;
+          }
+        })
+      },
       reset(){
-
+        this.queryParams={
+          accountingTestTaskId: this.$route.query.id,
+          sj:'105',
+          isMove:true,
+          dw:'106',
+          sjzt:'101',
+          sjzb:'102',
+          sjfj:'103',
+          sjls:'104',
+        }
+        this.fetch();
       },
       // 返回上一个页面
       returnPage() {

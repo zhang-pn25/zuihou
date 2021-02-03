@@ -3,56 +3,56 @@
     <div class="filter-container">
       <div style="display: inline">
         <div class="titLabel" style="width: 200px">
-          <div class="titText">任务名称</div>
+          <!-- <div class="titText">任务名称</div> -->
           <el-input placeholder='任务名称'
                     class="filter-item search-item" v-model="queryParams.model.taskName"/>
         </div>
-        <div class="titLabel" style="width: 250px">
-          <div class="titText">人员信息上报截止时间</div>
+        <div class="titLabel">
+          <!-- <div class="titText">人员信息上报截止时间</div> -->
           <el-date-picker
             v-model="queryParams.model.beforeDeadline"
             type="daterange"
             range-separator="至"
             class="filter-item search-item date-range-item"
-            start-placeholder="开始日期"
+            start-placeholder="人员信息上报截止时间起"
             value-format="yyyy-MM-dd"
-            end-placeholder="结束日期">
+            end-placeholder="人员信息上报截止时间止">
           </el-date-picker>
         </div>
-        <div class="titLabel" v-show="seniorType" style="width: 250px">
-          <div class="titText">检测开始时间</div>
+        <div class="titLabel" v-show="seniorType">
+          <!-- <div class="titText">检测开始时间</div> -->
           <el-date-picker
             v-model="queryParams.model.beforeDeadline"
             type="daterange"
             range-separator="至"
             class="filter-item search-item date-range-item"
-            start-placeholder="开始日期"
+            start-placeholder="检测开始时间起"
             value-format="yyyy-MM-dd"
-            end-placeholder="结束日期">
+            end-placeholder="检测开始时间止">
           </el-date-picker>
         </div>
-        <div class="titLabel" v-show="seniorType" style="width: 250px">
-          <div class="titText">检测结束时间</div>
+        <div class="titLabel" v-show="seniorType">
+          <!-- <div class="titText">检测结束时间</div> -->
           <el-date-picker
             v-model="queryParams.model.beforeDeadline"
             type="daterange"
             range-separator="至"
             class="filter-item search-item date-range-item"
-            start-placeholder="开始日期"
+            start-placeholder="检测结束时间起"
             value-format="yyyy-MM-dd"
-            end-placeholder="结束日期">
+            end-placeholder="检测结束时间止">
           </el-date-picker>
         </div>
-        <div class="titLabel" v-show="seniorType" style="width: 250px">
-          <div class="titText">检测结果上报截止时间</div>
+        <div class="titLabel" v-show="seniorType">
+          <!-- <div class="titText">检测结果上报截止时间</div> -->
           <el-date-picker
             v-model="queryParams.model.beforeDeadline"
             type="daterange"
             range-separator="至"
             value-format="yyyy-MM-dd"
             class="filter-item search-item date-range-item"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期">
+            start-placeholder="检测结果上报截止时间起"
+            end-placeholder="检测结果上报截止时间止">
           </el-date-picker>
         </div>
       </div>
@@ -63,7 +63,7 @@
         <el-button @click="reset" class="filter-item" plain type="warning">
           {{ $t("table.reset") }}
         </el-button>
-        <el-button @click="add" class="filter-item" plain type="danger" v-has-permission="['user:add']">
+        <el-button @click="add" class="filter-item" plain type="danger">
           {{ $t("table.add") }}
         </el-button>
         <el-button type="primary" plain class="filter-item" @click="seniorChange" :icon="seniorSearch.icon">{{seniorSearch.text}}</el-button>
@@ -161,28 +161,25 @@
           <i
             @click="edit(row)"
             class="el-icon-edit table-operation"
-            style="color: #2db7f5;"
+            style="color: #021E8C;"
             title="修改"
-            v-hasPermission="['role:update']"
           />
           <i
             @click="view(row)"
             class="el-icon-view table-operation"
             style="color: #87d068;"
             title="查看"
-            v-hasPermission="['role:update']"
           />
           <i
             @click="Delete(row.id)"
             class="el-icon-delete table-operation"
             style="color: #f50;"
             title="删除"
-            v-hasPermission="['role:delete']"
           />
-          <el-link class="no-perm" v-has-no-permission="['loginLog:delete']">{{
-            $t("tips.noPermission")
-            }}
-          </el-link>
+<!--          <el-link class="no-perm" v-has-no-permission="['loginLog:delete']">{{-->
+<!--            $t("tips.noPermission")-->
+<!--            }}-->
+<!--          </el-link>-->
         </template>
       </el-table-column>
     </el-table>
@@ -376,7 +373,7 @@
     margin-top: 7px;
   }
   .date-range-item {
-    width: 250px;
+    width: 440px;
     >>> .el-range-separator{
       width: 11%;
     }
