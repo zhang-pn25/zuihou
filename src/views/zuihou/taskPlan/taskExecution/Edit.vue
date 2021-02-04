@@ -16,7 +16,7 @@
       label-width="200px"
       ref="form"
     >
-      <el-form-item label="序号:" prop="serialNumber">
+      <!-- <el-form-item label="序号:" prop="serialNumber">
         <el-input
           placeholder="请输入序号"
           style="width: 85%"
@@ -25,7 +25,7 @@
           clearable
         >
         </el-input>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="任务名称:" prop="taskName">
         <el-input
           placeholder="请输入任务名称"
@@ -156,7 +156,7 @@ export default {
         describe: "",
         taskName: "",
         startTime: "",
-        serialNumber:'',
+        // serialNumber:'',
         endTime: "",
         checkAddress: "",
         status: 1,
@@ -165,11 +165,11 @@ export default {
       screenWidth: 0,
       width: this.initWidth(),
       rules: {
-        serialNumber:{
-          required: true,
-          message: this.$t("rules.require"),
-          trigger: "blur",
-        },
+        // serialNumber:{
+        //   required: true,
+        //   message: this.$t("rules.require"),
+        //   trigger: "blur",
+        // },
         taskName:{
             required: true,
             message: this.$t("rules.require"),
@@ -323,7 +323,7 @@ export default {
         describe: "",
         taskName: "",
         startTime: "",
-        serialNumber:'',
+        // serialNumber:'',
         endTime: "",
         checkAddress: "",
         status: 1,

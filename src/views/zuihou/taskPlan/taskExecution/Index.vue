@@ -63,7 +63,7 @@
         <el-button @click="reset" class="filter-item" plain type="warning">
           {{ $t("table.reset") }}
         </el-button>
-        <el-button @click="add" class="filter-item" plain type="danger">
+        <el-button @click="add" class="filter-item" plain type="danger" v-has-permission="['task:add']">
           {{ $t("table.add") }}
         </el-button>
         <el-button type="primary" plain class="filter-item" @click="seniorChange" :icon="seniorSearch.icon">{{seniorSearch.text}}</el-button>
@@ -81,9 +81,14 @@
       <el-table-column
         label="序号"
         align="center"
-        prop="serialNumber"
+        type='index'
         width="70"
       >
+      <template slot-scope="scope">
+        <span>
+          {{scope.$index + 1  + (tableData.current-1)*tableData.size}}
+        </span>
+      </template>
       </el-table-column>
       <el-table-column
         label="任务名称"
@@ -163,18 +168,21 @@
             class="el-icon-edit table-operation"
             style="color: #021E8C;"
             title="修改"
+            v-has-permission="['task:update']"
           />
           <i
             @click="view(row)"
             class="el-icon-view table-operation"
             style="color: #87d068;"
             title="查看"
+            v-has-permission="['task:view']"
           />
           <i
             @click="Delete(row.id)"
             class="el-icon-delete table-operation"
             style="color: #f50;"
             title="删除"
+            v-has-permission="['task:delete']"
           />
 <!--          <el-link class="no-perm" v-has-no-permission="['loginLog:delete']">{{-->
 <!--            $t("tips.noPermission")-->

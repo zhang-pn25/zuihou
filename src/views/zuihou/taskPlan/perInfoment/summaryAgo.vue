@@ -63,11 +63,15 @@
     <el-button @click="reset" class="filter-item" plain type="warning">
       {{ $t("table.reset") }}
     </el-button>
-    <el-button @click="add" :disabled="!this.$route.query.type" class="filter-item" plain type="danger">
+    <el-button @click="add" :disabled="!this.$route.query.type" class="filter-item" v-has-permission="['beforPersonnel:add']" plain type="danger">
       {{ $t("table.add") }}
     </el-button>
     <el-button type="info" plain @click="returnPage" class="filter-item">返回</el-button>
     <el-dropdown class="filter-item" trigger="click"
+     v-has-any-permission="[
+          'personnel:import',
+          'personnel:download',
+        ]"
                 >
       <el-button>
         {{ $t("table.more") }}
@@ -80,13 +84,13 @@
 <!--        <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:delete']">-->
 <!--          导入预览-->
 <!--        </el-dropdown-item>-->
-        <el-dropdown-item @click.native="addExcel">
+        <el-dropdown-item @click.native="addExcel" v-has-permission="['personnel:import']">
           导入
         </el-dropdown-item>
 <!--        <el-dropdown-item @click.native="updateExcel" v-has-permission="['user:export']">-->
 <!--          新增-->
 <!--        </el-dropdown-item>-->
-        <el-dropdown-item @click.native="stencilExcel">
+        <el-dropdown-item @click.native="stencilExcel" v-has-permission="['personnel:download']">
           模板下载
         </el-dropdown-item>
       </el-dropdown-menu>
@@ -307,14 +311,16 @@
           class="el-icon-edit table-operation"
           style="color: #021E8C;"
           title="修改"
+          v-has-permission="['beforPersonnel:update']"
         />
         <i
           @click="discover(row)"
           class="el-icon-discover table-operation"
           style="color: #DD5145;"
           title="调整"
+          v-has-permission="['beforPersonnel:update']"
         />
-        <el-link class="no-perm" v-has-no-permission="['loginLog:delete']">{{
+        <el-link class="no-perm" v-has-no-permission="['beforPersonnel:update']">{{
           $t("tips.noPermission")
           }}
         </el-link>

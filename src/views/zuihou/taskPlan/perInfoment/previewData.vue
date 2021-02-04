@@ -621,6 +621,10 @@
           if (valid) {
             vm.editSubmit();
           } else {
+            this.$message({
+              type:'warning',
+              message:'数据不完整'
+            })
             return false;
           }
         });

@@ -3,11 +3,15 @@ import Vue from 'vue'
 import 'normalize.css/normalize.css' // a modern alternative to CSS resets
 import Element from 'element-ui'
 import './styles/element-variables.scss'
+
 import '@/styles/index.scss' // global css
-import {setCookie, getCookie, delCookie} from './utils/cookieVal.js';
+
+
 import App from './App'
 import store from './store'
 import router from './router'
+
+import {setCookie, getCookie, delCookie} from './utils/cookieVal.js';
 
 import i18n from './lang' // internationalization
 import './icons' // icon
@@ -16,7 +20,7 @@ import request from '@/utils/request'
 
 import * as filters from './filters' // global filters
 import { hasPermission, hasNoPermission, hasAnyPermission } from './utils/permissionDirect'
-import {use} from "element-ui/src/locale";
+// import {use} from "element-ui/src/locale";
 
 Vue.directive("input-limit", {
   bind(el, binding) {
