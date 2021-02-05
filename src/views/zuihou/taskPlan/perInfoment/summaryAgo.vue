@@ -63,7 +63,7 @@
     <el-button @click="reset" class="filter-item" plain type="warning">
       {{ $t("table.reset") }}
     </el-button>
-    <el-button @click="add" :disabled="!this.$route.query.type" class="filter-item" v-has-permission="['beforPersonnel:add']" plain type="danger">
+    <el-button @click="add" class="filter-item" :disabled="editType" v-has-permission="['beforPersonnel:add']" plain type="danger">
       {{ $t("table.add") }}
     </el-button>
     <el-button type="info" plain @click="returnPage" class="filter-item">返回</el-button>
@@ -84,13 +84,13 @@
 <!--        <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:delete']">-->
 <!--          导入预览-->
 <!--        </el-dropdown-item>-->
-        <el-dropdown-item @click.native="addExcel" v-has-permission="['personnel:import']">
+        <el-dropdown-item :disabled="editType" @click.native="addExcel" v-has-permission="['personnel:import']">
           导入
         </el-dropdown-item>
 <!--        <el-dropdown-item @click.native="updateExcel" v-has-permission="['user:export']">-->
 <!--          新增-->
 <!--        </el-dropdown-item>-->
-        <el-dropdown-item @click.native="stencilExcel" v-has-permission="['personnel:download']">
+        <el-dropdown-item :disabled="editType" @click.native="stencilExcel" v-has-permission="['personnel:download']">
           模板下载
         </el-dropdown-item>
       </el-dropdown-menu>
@@ -105,12 +105,17 @@
     v-loading="loading"
   >
     <el-table-column
-      label="序号"
-      align="center"
-      prop="serialNumber"
-      width="80"
-    >
-    </el-table-column>
+        label="序号"
+        align="center"
+        type='index'
+        width="70"
+      >
+      <template slot-scope="scope">
+        <span>
+          {{scope.$index + 1  + (tableData.current-1)*tableData.size}}
+        </span>
+      </template>
+      </el-table-column>
     <el-table-column
       label="单位"
       :show-overflow-tooltip="true"
@@ -309,6 +314,7 @@
         <i
           @click="edit(row)"
           class="el-icon-edit table-operation"
+          :class="editType?'errClassStatus':'susClassStatus'"
           style="color: #021E8C;"
           title="修改"
           v-has-permission="['beforPersonnel:update']"
@@ -316,14 +322,11 @@
         <i
           @click="discover(row)"
           class="el-icon-discover table-operation"
+          :class="row.isMove?'errClassStatus':'susClassStatus'"
           style="color: #DD5145;"
           title="调整"
-          v-has-permission="['beforPersonnel:update']"
+          v-has-permission="['beforPersonnel:adjust']"
         />
-        <el-link class="no-perm" v-has-no-permission="['beforPersonnel:update']">{{
-          $t("tips.noPermission")
-          }}
-        </el-link>
       </template>
     </el-table-column>
   </el-table>
@@ -340,6 +343,12 @@
     @close="editClose"
     @success="editSuccess"
     ref="edit"
+  />
+  <adjust-edit
+    :dialog-visible="adjustDialog.isVisible"
+    @close="adjustClose"
+    @success="adjustSuccess"
+    ref="adjust"
   />
   <preview-data
     :dialog-visible="previewAgo.isVisible"
@@ -378,6 +387,7 @@
   import "@riophae/vue-treeselect/dist/vue-treeselect.css";
   import previewData from "./previewData";
   import orgApi from '@/api/Org.js'
+  import moment from 'moment'
   import perInforApi from "@/api/perInfor.js";
   import FileImport from "@/components/zuihou/Import"
   import { initQueryParams,downloadFile ,getDictsKey ,assignment} from '@/utils/commons';
@@ -385,9 +395,10 @@
   import stationApi from "@/api/Station.js";
   import elDragDialog from '@/directive/el-drag-dialog';
   import afterPerInforApi from "@/api/afterPerInfor.js";
+  import adjustEdit from "./adjustEdit";
     export default {
       name: "summaryAgo.vue",
-      components:{Edit,Pagination,previewData,FileImport,Treeselect},
+      components:{Edit,Pagination,previewData,FileImport,Treeselect ,adjustEdit},
       directives: { elDragDialog },
       data(){
         return{
@@ -397,6 +408,7 @@
             total: 0
           },
           orgList:[],
+          editType:false,
           fileImport: {
             isVisible: false,
             type: "import",
@@ -446,6 +458,9 @@
             isVisible: false,
             type: "add"
           },
+          adjustDialog:{
+            isVisible: false,
+          },
           preview: {
             isVisible: false,
             context: ''
@@ -462,6 +477,7 @@
       mounted() {
         this.initOrg();
         this.search();
+        this.countTime();
         getDictsKey(
           ["PERSONNEL_TYPE",'CHECK_TYPE'],
           this.dicts
@@ -474,6 +490,15 @@
         user() {
           return this.$store.state.account.user;
         },
+        // editType(){
+        //   let beforeTime = this.$route.query.beforeDeadline;
+        //   let newTime = moment(new Date()).format('YYYY-MM-DD HH:mm:ss');
+        //   if (newTime > beforeTime && this.user.code == 'SECONDARY_USER'){
+        //     return true
+        //   }else {
+        //     return false
+        //   }
+        // }
       },
       methods:{
         search(){
@@ -488,7 +513,6 @@
         },
         // 监听部门单位数据变化
         orgFiled(val){
-          console.log(val);
           let data = "";
           data = assignment(
             this.getNode(
@@ -548,9 +572,6 @@
               this.orgList = res.data
             })
         },
-        discover(){
-
-        },
         seniorChange(){
           if (this.seniorType){
             this.seniorType = false;
@@ -570,6 +591,12 @@
           this.dialog.isVisible = false;
         },
         editSuccess() {
+          this.search();
+        },
+        adjustClose(){
+          this.adjustDialog.isVisible = false;
+        },
+        adjustSuccess() {
           this.search();
         },
         previewClose(){
@@ -611,9 +638,19 @@
           this.search();
         },
         edit(row){
+          if (this.editType){
+            return false;
+          }
           this.dialog.type = "edit";
           this.dialog.isVisible = true;
           this.$refs.edit.setUser(row,this.orgList,this.user.orgId,this.dicts);
+        },
+        discover(row){
+          if (row.isMove){
+            return false;
+          }
+          this.adjustDialog.isVisible = true;
+          this.$refs.adjust.setUser(row,this.orgList,this.user.orgId);
         },
         add(){
           this.dialog.type = "add";
@@ -683,10 +720,34 @@
           });
           return this.treePath;
         },
+        countTime () {
+          // 获取当前时间
+          let date = new Date()
+          let now = date.getTime()
+          // 设置截止时间
+          let end = moment(this.$route.query.beforeDeadline).valueOf();
+          // 时间差
+          let leftTime = end - now;
+          // 等于0的时候不调用
+          if (leftTime < 0) {
+            if (this.user.code == 'SECONDARY_USER'){
+              this.editType = true;
+            }
+            return false;
+          } else {
+            // 递归每秒调用countTime方法
+            setTimeout(this.countTime, 1000)
+          }
+        },
       }
     }
 </script>
 
-<style scoped>
-
+<style lang='scss' scoped>
+.susClassStatus {
+  cursor: pointer;
+}
+.errClassStatus {
+  cursor: not-allowed;
+}
 </style>

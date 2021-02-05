@@ -16,12 +16,12 @@
         </el-col>
         <el-col :span="10">
           <div style="float: right;">
-            <div v-if="this.$route.query.type == true">
+            <div>
               <span style="font-size: 16px;margin-top: 13px;display: block">距离<label style="color: red">{{this.$route.query.taskName}}</label>任务的检测结果上报截止时间还有<label style="color: red">{{day}}</label>天<label style="color: red">{{hour}}</label>时<label style="color: red">{{min}}</label>分<label style="color: red">{{second}}</label>秒，请尽快上传</span>
             </div>
-            <div v-else>
-              <el-button  class="filter-item" style="margin-bottom: 5px" plain type="danger" v-has-permission="['user:add']">重新激活</el-button>
-            </div>
+<!--            <div v-else>-->
+<!--              <el-button  class="filter-item" style="margin-bottom: 5px" plain type="danger" v-has-permission="['user:add']">重新激活</el-button>-->
+<!--            </div>-->
           </div>
         </el-col>
       </el-row>
@@ -46,6 +46,7 @@
   import summaryAgo from './summaryAgo';
   // import summaryRecord from './summaryRecord';
   import statisticalAfter from "./statisticalAfter";
+  import moment from "moment";
     export default {
         name: "Index",
       components:{
@@ -96,7 +97,6 @@
       },
       methods:{
         handleClick(tab, event) {
-          console.log(tab, event);
         },
         toggleTab(tab){
           this.cut = tab;
@@ -106,8 +106,7 @@
           let date = new Date()
           let now = date.getTime()
           // 设置截止时间
-          let endDate = new Date(this.curStartTime) // this.curStartTime需要倒计时的日期
-          let end = endDate.getTime()
+          let end = moment(this.curStartTime).valueOf();
           // 时间差
           let leftTime = end - now
           // 定义变量 d,h,m,s保存倒计时的时间
@@ -131,10 +130,8 @@
           }
           // 等于0的时候不调用
           if (Number(this.hour) === 0 && Number(this.day) === 0 && Number(this.min) === 0 && Number(this.second) === 0) {
-            this.$route.query.type = false;
             return
           } else {
-            this.$route.query.type = true;
             // 递归每秒调用countTime方法，显示动态时间效果,
             setTimeout(this.countTime, 1000)
           }

@@ -18,19 +18,6 @@
     >
       <el-row>
         <el-col :sm="12" :xs="24">
-          <!--序号 -->
-          <el-form-item label="序号:" prop="serialNumber">
-            <el-input
-              placeholder="请输入序号"
-              v-input-limit='0'
-              style="width: 92%"
-              v-model="summaryData.serialNumber"
-              clearable
-            >
-            </el-input>
-          </el-form-item>
-        </el-col>
-        <el-col :sm="12" :xs="24">
           <!--单位部门 -->
           <el-form-item label="单位部门:" prop="filed">
             <el-cascader
@@ -44,10 +31,8 @@
             ></el-cascader>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--职务级别 -->
+         <!--职务级别 -->
           <el-form-item label="职务级别:" prop="post.key">
             <el-select
               style="width: 92%"
@@ -65,8 +50,10 @@
             </el-select>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--姓名 -->
+         <!--姓名 -->
           <el-form-item label="姓名:" prop="userName">
             <el-input
               placeholder="请输入姓名"
@@ -77,8 +64,6 @@
             </el-input>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :sm="12" :xs="24">
           <!--性别 -->
           <el-form-item label="性别:" prop="sex.code">
@@ -92,8 +77,10 @@
             </el-select>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--出生年月 -->
+           <!--出生年月 -->
           <el-form-item label="出生年月:" prop="dateOfBirth">
             <el-date-picker
               v-model="summaryData.dateOfBirth"
@@ -104,8 +91,6 @@
             </el-date-picker>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :sm="12" :xs="24">
           <!--人员类别 -->
           <el-form-item label="人员类别:" prop="personnelType">
@@ -114,8 +99,10 @@
             </el-select>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--身份证号 -->
+         <!--身份证号 -->
           <el-form-item label="身份证号:" prop="idNumber">
             <el-input
               placeholder="请输入身份证号"
@@ -126,8 +113,6 @@
             </el-input>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :sm="12" :xs="24">
           <!--家庭住址 -->
           <el-form-item label="家庭住址:" prop="homeAddress">
@@ -140,6 +125,8 @@
             </el-input>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :sm="12" :xs="24">
           <!--婚否 -->
           <el-form-item label="婚否:" prop="marriage">
@@ -153,10 +140,8 @@
             </el-select>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--借调类型 -->
+           <!--借调类型 -->
           <el-form-item label="借调类型:" prop="secondmentType">
             <el-input
               placeholder="请输入借调类型"
@@ -167,8 +152,10 @@
             </el-input>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--原单位 -->
+         <!--原单位 -->
           <el-form-item label="原单位:" prop="beforeCompany">
             <el-input
               placeholder="请输入原单位"
@@ -179,10 +166,8 @@
             </el-input>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--疫苗接种类别 -->
+           <!--疫苗接种类别 -->
           <el-form-item label="疫苗接种类别:" prop="inoculateType">
             <el-input
               placeholder="请输入疫苗接种类别"
@@ -193,8 +178,10 @@
             </el-input>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--联系电话 -->
+         <!--联系电话 -->
           <el-form-item label="联系电话:" prop="phone">
             <el-input
               placeholder="请输入联系电话"
@@ -205,10 +192,8 @@
             </el-input>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--标本编号 -->
+           <!--标本编号 -->
           <el-form-item label="标本编号:" prop="specimenNumber">
             <el-input
               placeholder="请输入标本编号"
@@ -219,8 +204,10 @@
             </el-input>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--人员状态 -->
+         <!--人员状态 -->
           <el-form-item label="人员状态:" prop="personnelStatus">
             <el-input
               placeholder="请输入人员状态"
@@ -231,8 +218,6 @@
             </el-input>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :sm="12" :xs="24">
           <!--检测类型 -->
           <el-form-item label="检测类型:" prop="checkType">
@@ -241,8 +226,10 @@
             </el-select>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--个人签名 -->
+           <!--个人签名 -->
           <el-form-item label="个人签名:" prop="personalSignature">
             <el-input
               placeholder="请输入个人签名"
@@ -253,10 +240,8 @@
             </el-input>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :sm="12" :xs="24">
-          <!--检测地址 -->
+         <!--检测地址 -->
           <el-form-item label="检测地址:" prop="checkAddress">
             <el-input
               placeholder="请输入检测地址"
@@ -269,6 +254,8 @@
             </el-input>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :sm="12" :xs="24">
           <!--备注 -->
           <el-form-item label="备注:" prop="remarks">
@@ -283,7 +270,6 @@
             </el-input>
           </el-form-item>
         </el-col>
-
       </el-row>
     </el-form>
     <div class="dialog-footer" slot="footer">
@@ -326,7 +312,6 @@
         summaryData: {
           filed:[],
           orgId:'',
-          serialNumber:'',
           status: 1,
           company:{
             key:'',
@@ -345,7 +330,7 @@
           sex:{
             code:'',
           },
-          isActivation:false,
+          adjustCompany:'0',
           personnelType:{
             key:'',
           },
@@ -360,11 +345,6 @@
         screenWidth: 0,
         width: this.initWidth(),
         rules: {
-          serialNumber:{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "blur",
-          },
           filed:{
             required: true,
             message: this.$t("rules.require"),
@@ -408,7 +388,6 @@
           },{
             validator: (rule, value, callback) => {
               let reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
-              console.log(reg.test(value));
               if (reg.test(value)) {
                 callback();
               } else {
@@ -430,7 +409,6 @@
           },{
             validator: (rule, value, callback) => {
               let reg = /^[1][3,4,5,6,7,8,9][0-9]{9}$/;
-              console.log(reg.test(value));
               if (reg.test(value)) {
                 callback();
               } else {
@@ -514,7 +492,6 @@
         this.summaryData ={
           filed:[],
           orgId:'',
-          serialNumber:'',
           status: 1,
           company:{
             key:'',
@@ -531,7 +508,7 @@
             key:'',
             data:{}
           },
-          isActivation:false,
+          adjustCompany:'0',
           sex:{
             code:'',
           },
@@ -560,7 +537,6 @@
         let data = JSON.parse(JSON.stringify(this.summaryData));
         delete data.filed;
         data.specimenNumber = Number(data.specimenNumber);
-        data.serialNumber = Number(data.serialNumber);
         data.accountingTestTaskId = this.$route.query.id;
         if (vm.type === "add") {
           vm.save(data);
@@ -572,7 +548,6 @@
         const vm = this;
         perInforApi.afterPersonnel(list).then((response) => {
           const res = response.data;
-          console.log(res.data);
           if (res.isSuccess) {
             vm.isVisible = false;
             vm.$message({

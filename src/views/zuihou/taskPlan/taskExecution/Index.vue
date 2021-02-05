@@ -22,7 +22,7 @@
         <div class="titLabel" v-show="seniorType">
           <!-- <div class="titText">检测开始时间</div> -->
           <el-date-picker
-            v-model="queryParams.model.beforeDeadline"
+            v-model="queryParams.model.startTime"
             type="daterange"
             range-separator="至"
             class="filter-item search-item date-range-item"
@@ -34,7 +34,7 @@
         <div class="titLabel" v-show="seniorType">
           <!-- <div class="titText">检测结束时间</div> -->
           <el-date-picker
-            v-model="queryParams.model.beforeDeadline"
+            v-model="queryParams.model.endTime"
             type="daterange"
             range-separator="至"
             class="filter-item search-item date-range-item"
@@ -46,7 +46,7 @@
         <div class="titLabel" v-show="seniorType">
           <!-- <div class="titText">检测结果上报截止时间</div> -->
           <el-date-picker
-            v-model="queryParams.model.beforeDeadline"
+            v-model="queryParams.model.afterDeadline"
             type="daterange"
             range-separator="至"
             value-format="yyyy-MM-dd"
@@ -280,21 +280,36 @@
         this.search();
       },
       fetch(params = {}) {
-        this.loading = true;
+        // this.loading = true;
         if (this.queryParams.timeRange) {
           this.queryParams.map.createTime_st = this.queryParams.timeRange[0];
           this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
         }
-
         this.queryParams.current = params.current ? params.current : this.queryParams.current;
         this.queryParams.size = params.size ? params.size : this.queryParams.size;
-
-        taskApi.page(this.queryParams).then(response => {
+        let queryData = this.dateFilter(this.queryParams);
+        delete queryData.model.beforeDeadline;
+        delete queryData.model.afterDeadline;
+        delete queryData.model.startTime;
+        delete queryData.model.endTime;
+        taskApi.page(queryData).then(response => {
           const res = response.data;
           if (res.isSuccess) {
             this.tableData = res.data;
           }
         }).finally(() => this.loading = false);
+      },
+      dateFilter(list){
+        let data = JSON.parse(JSON.stringify(list))
+        data.model.beforeDeadlineStart = data.model.beforeDeadline?data.model.beforeDeadline[0]:'';
+        data.model.beforeDeadlineEnd = data.model.beforeDeadline?data.model.beforeDeadline[1]:'';
+        data.model.afterDeadlineStart = data.model.afterDeadline?data.model.afterDeadline[0]:'';
+        data.model.afterDeadlineEnd = data.model.afterDeadline?data.model.afterDeadline[1]:'';
+        data.model.startTimeStart = data.model.startTime?data.model.startTime[0]:'';
+        data.model.startTimeEnd = data.model.startTime?data.model.startTime[1]:'';
+        data.model.endTimeStart = data.model.endTime?data.model.endTime[0]:'';
+        data.model.endTimeEnd = data.model.endTime?data.model.endTime[1]:'';
+        return data;
       },
       edit(row){
         this.$refs.edit.setUser(row,this.user.orgId);
@@ -368,7 +383,10 @@
         });
       },
       reset() {
-        this.queryParams = initQueryParams();
+        this.queryParams = initQueryParams({
+          model:{
+          }
+        });
         this.$refs.table.clearSort();
         this.$refs.table.clearFilter();
         this.search();

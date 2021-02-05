@@ -62,7 +62,7 @@ export default {
         }
 
         // 移动当前元素
-        dragDom.style.cssText += `;left:${left + styL}px;top:${top + styT}px;`
+        // dragDom.style.cssText += `;left:${left + styL}px;top:${top + styT}px;`
 
         // emit onDrag event
         vnode.child.$emit('dragDialog')

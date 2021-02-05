@@ -34,7 +34,7 @@
       value-format="yyyy-MM-dd"
     >
     </el-date-picker>
-    <el-select class="filter-item search-item" clearable v-model="queryParams.model.isAbnormal.key" placeholder="请选择检测是否异常">
+    <el-select class="filter-item search-item" clearable v-model="queryParams.model.isAbnormal" placeholder="请选择检测是否异常">
       <el-option
         v-for="item in isAbnormalList"
         :key="item.value"
@@ -113,12 +113,17 @@
       style="width: 100%;margin-top: 10px"
       v-loading="loading"
     >
-      <el-table-column
+     <el-table-column
         label="序号"
         align="center"
-        prop="serialNumber"
-        width="80"
+        type='index'
+        width="70"
       >
+      <template slot-scope="scope">
+        <span>
+          {{scope.$index + 1  + (tableData.current-1)*tableData.size}}
+        </span>
+      </template>
       </el-table-column>
       <el-table-column
         label="单位"
@@ -526,9 +531,6 @@
               key:'',
               data:''
             },
-            isAbnormal:{
-              key:''
-            },
             "isDelete": true,
             "post": {
               "data": "",
@@ -569,11 +571,13 @@
     mounted() {
       this.initOrg();
       this.search();
-      console.log(this.$route.query.type)
       getDictsKey(
         ["PERSONNEL_TYPE",'CHECK_TYPE'],
         this.dicts
       );
+    },
+    watch:{
+      'queryParams.model.filed':'orgFiled'
     },
     computed: {
       user() {
@@ -661,9 +665,6 @@
             key:'',
             data:''
           },
-          isAbnormal:{
-            key:''
-          },
           "isDelete": true,
           "post": {
             "data": "",
@@ -674,7 +675,7 @@
             "desc": ""
           },
           "status": true,
-          filed:[],
+          filed:null,
         }
         this.stationList = [];
         this.search();
@@ -696,7 +697,6 @@
         if (!data.model.departMent.key) delete data.model.departMent;
         if (!data.model.personnelType.key) delete data.model.personnelType;
         if (!data.model.post.key) delete data.model.post;
-        if (!data.model.isAbnormal.key) delete data.model.isAbnormal;
         if (!data.model.checkType.key) delete data.model.checkType;
         if (!data.model.sex.code) delete data.model.sex;
         return data;

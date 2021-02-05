@@ -30,28 +30,28 @@
         width="180"
       >
         <template slot-scope="scope">
-            <span>{{scope.row.reason}}</span>
+            <span>{{scope.row.reason?scope.row.reason:'无'}}</span>
         </template>
       </el-table-column>
-      <el-table-column
-        label="序号"
-        align="center"
-        prop="serialNumber"
-        width="80"
-      >
-        <template slot-scope="scope">
-          <el-form-item :prop=" 'tableData.' + scope.$index + '.serialNumber' " :rules="rules.serialNumber">
-            <el-input
-              placeholder="序号"
-              v-input-limit='0'
-              @change="updateRow(scope.row)"
-              style="width: 100%;text-align: center"
-              v-model="scope.row.serialNumber"
-            >
-            </el-input>
-          </el-form-item>
-        </template>
-      </el-table-column>
+<!--      <el-table-column-->
+<!--        label="序号"-->
+<!--        align="center"-->
+<!--        prop="serialNumber"-->
+<!--        width="80"-->
+<!--      >-->
+<!--        <template slot-scope="scope">-->
+<!--          <el-form-item :prop=" 'tableData.' + scope.$index + '.serialNumber' " :rules="rules.serialNumber">-->
+<!--            <el-input-->
+<!--              placeholder="序号"-->
+<!--              v-input-limit='0'-->
+<!--              @change="updateRow(scope.row)"-->
+<!--              style="width: 100%;text-align: center"-->
+<!--              v-model="scope.row.serialNumber"-->
+<!--            >-->
+<!--            </el-input>-->
+<!--          </el-form-item>-->
+<!--        </template>-->
+<!--      </el-table-column>-->
       <el-table-column
         label="单位"
         :show-overflow-tooltip="true"
@@ -466,7 +466,7 @@
           tableData: [],
         },
         rules: {
-          serialNumber: { required: true,message: '不能为空',trigger: "blur", },
+          // serialNumber: { required: true,message: '不能为空',trigger: "blur", },
           filed:{ required: true,message: '不能为空',trigger: "change" },
           post:{ required: true,message: '不能为空',trigger: "change"},
           userName:{ required: true,message: '不能为空',trigger: "blur" },
@@ -663,7 +663,6 @@
         const vm = this;
         perInforApi.afterPersonnel(list).then((response) => {
           const res = response.data;
-          console.log(res.data);
           if (res.isSuccess) {
             vm.isVisible = false;
             vm.$message({
@@ -674,22 +673,22 @@
           }
         });
       },
-      update(list) {
-        list.company.data = {};
-        list.departMent.data = {};
-        list.post.data = {};
-        perInforApi.afterUpdatePersonnel(list).then((response) => {
-          const res = response.data;
-          if (res.isSuccess) {
-            this.isVisible = false;
-            this.$message({
-              message: this.$t("tips.updateSuccess"),
-              type: "success",
-            });
-            this.$emit("success");
-          }
-        });
-      },
+      // update(list) {
+      //   list.company.data = {};
+      //   list.departMent.data = {};
+      //   list.post.data = {};
+      //   perInforApi.afterUpdatePersonnel(list).then((response) => {
+      //     const res = response.data;
+      //     if (res.isSuccess) {
+      //       this.isVisible = false;
+      //       this.$message({
+      //         message: this.$t("tips.updateSuccess"),
+      //         type: "success",
+      //       });
+      //       this.$emit("success");
+      //     }
+      //   });
+      // },
       getNode(data,id){
         let result;
         if (!data) {

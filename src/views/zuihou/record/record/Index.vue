@@ -19,21 +19,20 @@
     <el-button @click="reset" class="filter-item" plain type="warning">
       {{ $t("table.reset") }}
     </el-button>
-    <el-button type="info" plain @click="returnPage" class="filter-item">返回</el-button>
     <el-dropdown class="filter-item" trigger="click"
                  v-has-any-permission="[
-            'user:export',
-            'user:import',
+            'personnel:export',
+            'personnel:export',
           ]">
       <el-button>
         {{ $t("table.more") }}
         <i class="el-icon-arrow-down el-icon--right"/>
       </el-button>
       <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item @click.native="exportExcel" v-has-permission="['user:export']">
+        <el-dropdown-item @click.native="exportExcel" v-has-permission="['personnel:export']">
           导出
         </el-dropdown-item>
-        <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['user:import']">
+        <el-dropdown-item @click.native="exportPreviewExcel" v-has-permission="['personnel:export']">
           导出预览
         </el-dropdown-item>
       </el-dropdown-menu>
@@ -49,9 +48,14 @@
       <el-table-column
         label="序号"
         align="center"
-        prop="serialNumber"
-        width="80"
+        type='index'
+        width="70"
       >
+        <template slot-scope="scope">
+        <span>
+          {{scope.$index + 1  + (tableData.current-1)*tableData.size}}
+        </span>
+        </template>
       </el-table-column>
       <el-table-column
         label="单位"
@@ -385,7 +389,6 @@
     mounted() {
       this.initOrg();
       this.search();
-      console.log(this.$route.query.type)
       getDictsKey(
         ["PERSONNEL_TYPE",'CHECK_TYPE'],
         this.dicts
@@ -486,6 +489,7 @@
           this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
         }
         let queryParam = this.disposeData();
+        queryParam.size = -1;
         queryParam.map.fileName = '检测后人员信息汇总'
         afterPerInforApi.export(queryParam).then(response => {
           downloadFile(response);
@@ -498,6 +502,7 @@
           this.queryParams.map.createTime_ed = this.queryParams.timeRange[1];
         }
         let queryParam = this.disposeData();
+        queryParam.size = -1;
         queryParam.map.fileName = '检测后人员信息汇总预览'
         afterPerInforApi.preview(queryParam).then(response => {
           const res = response.data;

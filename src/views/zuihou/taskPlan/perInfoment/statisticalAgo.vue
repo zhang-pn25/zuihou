@@ -31,11 +31,12 @@
       style="width: 100%;margin-top: 10px"
       v-loading="loading"
     >
-      <el-table-column
-        type="index"
+     <el-table-column
         label="序号"
         align="center"
-        width="80">
+        type='index'
+        width="70"
+      >
       </el-table-column>
       <el-table-column
         label="单位"

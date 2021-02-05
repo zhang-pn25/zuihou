@@ -43,6 +43,11 @@ const apiList = {
     method:'POST',
     url:`/nucleic/beforPersonnel/cancelSaveBach`
   },
+  // 调整
+  updateAndSave:{
+    method:'PUT',
+    url:`/nucleic/afterPersonnel/updateAndSave`
+  }
 }
 
 export default {
@@ -104,6 +109,12 @@ export default {
   cancelSaveBach(data){
     return axiosApi({
       ...apiList.cancelSaveBach,
+      data
+    })
+  },
+  updateAndSave(data){
+    return axiosApi({
+      ...apiList.updateAndSave,
       data
     })
   }
