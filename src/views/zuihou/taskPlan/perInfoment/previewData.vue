@@ -1,8 +1,9 @@
 <template>
   <el-dialog
     :close-on-click-modal="false"
-    :close-on-press-escape="true"
+    :close-on-press-escape="false"
     :title="title"
+    :show-close="false"
     :visible.sync="isVisible"
     :width="width"
     top="50px"
@@ -76,6 +77,7 @@
               style="width: 100%"
               :props="{ value: 'id' }"
               :options="orgList"
+              placeholder="单位部门"
               :show-all-levels="false"
               @change="orgFiled(scope.row)"
               v-model="scope.row.filed"
@@ -231,7 +233,7 @@
         prop="marriage"
       >
         <template slot-scope="{row}">
-          <el-select style="width: 100%" @change="updateRow(scope.row)" v-model="row.marriage" placeholder="性别">
+          <el-select style="width: 100%" @change="updateRow(scope.row)" v-model="row.marriage" placeholder="婚否">
             <el-option
               v-for="item in maritalData"
               :key="item.value"
@@ -354,10 +356,12 @@
         width="140"
         prop="checkType"
       >
-        <template slot-scope="{row}">
-          <el-select style="width: 100%" @change="updateRow(scope.row)" clearable placeholder="人员类别" v-model="row.checkType.key" value>
-            <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.CHECK_TYPE" />
-          </el-select>
+        <template slot-scope="scope">
+          <el-form-item :prop=" 'tableData.' + scope.$index + '.checkType.key' " :rules="rules.checkType">
+            <el-select style="width: 100%" @change="updateRow(scope.row)" placeholder="检测类型" v-model="scope.row.checkType.key" value>
+              <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.CHECK_TYPE" />
+            </el-select>
+          </el-form-item>
         </template>
       </el-table-column>
       <el-table-column
@@ -471,6 +475,7 @@
           post:{ required: true,message: '不能为空',trigger: "change"},
           userName:{ required: true,message: '不能为空',trigger: "blur" },
           sex:{ required: true,message: '不能为空',trigger: "change" },
+          checkType:{ required: true,message: '不能为空',trigger: "change" },
           idNumber:[{ required: true, message: this.$t("rules.require"), trigger: "blur",},
             {
               validator: (rule, value, callback) => {
@@ -566,6 +571,7 @@
         data.company.data = {};
         data.departMent.data = {};
         data.post.data = {};
+        data.orgId.data = {};
         perInforApi.beforeUpdatePersonnel(data).then((response) => {
           const res = response.data;
           if (res.isSuccess) {
@@ -573,9 +579,8 @@
               message: this.$t("tips.updateSuccess"),
               type: "success",
             });
-          }else {
-            this.fetch()
           }
+          this.fetch()
         });
       },
       // 获取职务级别的数据
@@ -619,10 +624,19 @@
         const vm = this;
         this.$refs.form.validate((valid) => {
           if (valid) {
+            for(let item of this.form.tableData){
+              if (item.reason){
+                this.$message({
+                  type:'error',
+                  message:'信息有误，请仔细核对信息！'
+                })
+                return false;
+              }
+            } 
             vm.editSubmit();
           } else {
             this.$message({
-              type:'warning',
+              type:'error',
               message:'数据不完整'
             })
             return false;

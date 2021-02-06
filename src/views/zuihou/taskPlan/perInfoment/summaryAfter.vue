@@ -44,7 +44,7 @@
     </el-select>
     <div style="display: inline" v-show = 'seniorType'>
       <el-input placeholder='请输入姓名' class="filter-item search-item" v-model="queryParams.model.userName"/>
-      <el-select class="filter-item search-item" placeholder="请输入人员类别" v-model="queryParams.model.personnelType.key" value>
+      <el-select class="filter-item search-item" placeholder="请选择人员类别" v-model="queryParams.model.personnelType.key" value>
         <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
       </el-select>
       <el-select class="filter-item search-item" clearable v-model="queryParams.model.sex.code" placeholder="请选择性别">
@@ -188,7 +188,7 @@
         prop="dateOfBirth"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.dateOfBirth }}</span>
+          <span>{{ scope.row.dateOfBirth | dateFilter }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -479,6 +479,7 @@
 <script>
   // import Edit from "./afterEdit";
   import orgApi from '@/api/Org.js'
+  import moment from 'moment'
   import Treeselect from "@riophae/vue-treeselect";
   import "@riophae/vue-treeselect/dist/vue-treeselect.css";
   import afterPerInforApi from "@/api/afterPerInfor.js";
@@ -499,7 +500,11 @@
         }else if (val == true) {
           return '是'
         }
-      }
+      },
+      dateFilter(val){
+        let date = moment(val).format('YYYY-MM-DD');
+        return date;
+      },
     },
     data(){
       return{
@@ -568,14 +573,6 @@
         }
       }
     },
-    mounted() {
-      this.initOrg();
-      this.search();
-      getDictsKey(
-        ["PERSONNEL_TYPE",'CHECK_TYPE'],
-        this.dicts
-      );
-    },
     watch:{
       'queryParams.model.filed':'orgFiled'
     },
@@ -606,10 +603,21 @@
       },
       fetch(){
         let queryParam = this.disposeData();
+        queryParam.model.isMove = true;
         afterPerInforApi.afterPage(queryParam).then(response =>{
           let res = response.data;
           this.tableData = res.data;
         })
+      },
+      setData(val){
+        if(val){
+          this.initOrg();
+          this.reset();
+          getDictsKey(
+            ["PERSONNEL_TYPE",'CHECK_TYPE'],
+            this.dicts
+          );
+        }
       },
       // 监听部门单位数据变化
       orgFiled(val){
@@ -737,6 +745,23 @@
       },
       // 数据更新
       update(row,val){
+        if(val == 1){
+          if(row.checkTime < this.$route.query.startTime){
+            this.$message({
+              type:'warning',
+              message:'检测时间不得小于检测开始时间'
+            });
+            row.checkTime = '';
+            return false;
+          }else if(row.checkTime > this.$route.query.endTime){
+            this.$message({
+              type:'warning',
+              message:'检测时间不得大于检测结束时间'
+            })
+            row.checkTime = '';
+            return false;
+          }
+        }
         let list = JSON.parse(JSON.stringify(row))
         list.company.data = {};
         list.departMent.data = {};
@@ -744,7 +769,6 @@
         afterPerInforApi.afterUpdatePersonnel(list).then((response) => {
           const res = response.data;
           if (res.isSuccess) {
-            this.isVisible = false;
             this.$message({
               message: this.$t("tips.updateSuccess"),
               type: "success",

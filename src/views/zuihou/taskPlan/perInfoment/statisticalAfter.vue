@@ -178,10 +178,6 @@
         unitList:[],
       }
     },
-    mounted() {
-      this.search();
-      this.findCompany();
-    },
     computed: {
       user() {
         return this.$store.state.account.user;
@@ -191,9 +187,16 @@
       search(){
         this.fetch();
       },
+      setData(val){
+        if(val){
+          this.reset();
+          this.findCompany();
+        }
+      },
       fetch(){
         let data = JSON.parse(JSON.stringify(this.queryParams));
         data.orgId = this.user.orgId;
+        data.roleCode = this.user.code,
         afterPerInforApi.afterStatisticalPage(data).then(response =>{
           let res = response.data;
           this.tableData = res.data;

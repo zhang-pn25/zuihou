@@ -19,8 +19,8 @@ const apiList = {
   },
   afterUpdatePersonnel:{
     method:'PUT',
-    // url:`/nucleic/afterPersonnel/updatePersonnelAfter`
-    url:`/nucleic/afterPersonnel`
+    url:`/nucleic/afterPersonnel/updatePersonnelAfter`
+    // url:`/nucleic/afterPersonnel`
   },
   afterPage:{
     method:'POST',

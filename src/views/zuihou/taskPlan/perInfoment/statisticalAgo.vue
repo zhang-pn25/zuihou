@@ -183,22 +183,25 @@
         },
       }
     },
-    mounted() {
-      this.search();
-      this.findCompany();
-    },
     computed: {
       user() {
         return this.$store.state.account.user;
       },
     },
     methods:{
+      setData(val){
+        if(val){
+          this.reset();
+          this.findCompany();
+        }
+      },
       search(){
         this.fetch();
       },
       fetch(){
         let data = JSON.parse(JSON.stringify(this.queryParams));
         data.orgId = this.user.orgId;
+        data.roleCode = this.user.code,
         afterPerInforApi.afterStatisticalPage(data).then(response =>{
           let res = response.data;
           this.tableData = res.data;

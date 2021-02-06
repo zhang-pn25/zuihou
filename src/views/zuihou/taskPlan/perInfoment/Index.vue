@@ -2,36 +2,58 @@
   <div>
   <div class="app-container">
     <div class="filter-container">
-      <el-row style="border-bottom: 1px solid #D6D8DE">
-        <el-col :span="14">
-          <el-row>
-            <el-col :span="4" v-for="(item,index) in tabList" :key="index">
+      <!-- <el-row>
+        <el-col :span="24">
+          <el-tabs v-model="activeName" @tab-click="handleClick">
+            <el-tab-pane label="用户管理" name="first">用户管理</el-tab-pane>
+            <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>
+            <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
+            <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
+          </el-tabs>
+        </el-col>
+      </el-row> -->
+      <el-row>
+        <el-col :span="24">
+          <!-- <el-row>
+            <el-col :span="6" v-for="(item,index) in tabList" :key="index">
               <div class="tab_Moda" @click="toggleTab(item.path,index)">
                 <span class="tab_text" :class="item.path == cut?'isActive':''">
                   {{item.name}}
                 </span>
               </div>
             </el-col>
-          </el-row>
+          </el-row> -->
+          <el-tabs v-model="activeName" @tab-click="handleClick">
+            <el-tab-pane label="人员信息汇总-检测前" name="first">
+              <summary-ago ref="first"></summary-ago>
+            </el-tab-pane>
+            <el-tab-pane label="人员信息汇总-检测后" name="second">
+              <summary-after ref="second"></summary-after>
+            </el-tab-pane>
+            <el-tab-pane label="人员信息统计-检测前" name="third">
+              <statistical-ago ref="third"></statistical-ago>
+            </el-tab-pane>
+            <el-tab-pane label="人员信息统计-检测后" name="fourth">
+              <statistical-after ref="fourth"></statistical-after>
+            </el-tab-pane>
+          </el-tabs>
         </el-col>
-        <el-col :span="10">
+      </el-row>
+      <div class="prompt">
           <div style="float: right;">
-            <div>
-              <span style="font-size: 16px;margin-top: 13px;display: block">距离<label style="color: red">{{this.$route.query.taskName}}</label>任务的检测结果上报截止时间还有<label style="color: red">{{day}}</label>天<label style="color: red">{{hour}}</label>时<label style="color: red">{{min}}</label>分<label style="color: red">{{second}}</label>秒，请尽快上传</span>
-            </div>
+            <span style="font-size: 14px;margin-top: 13px;display: block">距离<label style="color: red;font-size:18px">{{this.$route.query.taskName}}</label>任务的检测结果上报截止时间还有<label style="color: red;font-size:18px">{{day}}</label>天，请尽快上传</span>
+          </div>
 <!--            <div v-else>-->
 <!--              <el-button  class="filter-item" style="margin-bottom: 5px" plain type="danger" v-has-permission="['user:add']">重新激活</el-button>-->
 <!--            </div>-->
-          </div>
-        </el-col>
-      </el-row>
-      <el-row>
+      </div>
+      <!-- <el-row>
         <el-col :span="24">
           <div style="margin-top: 30px">
             <component v-bind:is="cut" keep-alive></component>
           </div>
         </el-col>
-      </el-row>
+      </el-row> -->
     </div>
   </div>
 <div>
@@ -63,24 +85,21 @@
             context: ''
           },
           btnType:false,
+          timer:'',
           curStartTime: '',
           day: '0',
           hour: '00',
           min: '00',
           second: '00',
-          tabList:[
-            {path:'summaryAgo',name:'人员信息汇总-检测前'},
-            {path:'summaryAfter',name:'人员信息汇总-检测后'},
-            // {path:'summaryRecord',name:'人员信息检测记录'},
-            {path:'statisticalAgo',name:'人员信息统计-检测前'},
-            {path:'statisticalAfter',name:'人员信息统计-检测后'}
-            ],
           cut:'summaryAgo',
           queryParams:initQueryParams({
             model:{
             }
           }),
         }
+      },
+      beforeDestroy(){
+        clearTimeout(this.timer);
       },
       created() {
         this.curStartTime = this.$route.query.afterDeadline;
@@ -97,10 +116,26 @@
       },
       methods:{
         handleClick(tab, event) {
+          switch (tab.index) {
+            case '0':
+                this.$refs.first.setData(true);
+              break;
+              case '1':
+                this.$refs.second.setData(true)
+              break;
+              case '2':
+                this.$refs.third.setData(true)
+              break;
+              case '3':
+                this.$refs.fourth.setData(true)
+              break;
+            default:
+              break;
+          }
         },
-        toggleTab(tab){
-          this.cut = tab;
-        },
+        // toggleTab(tab){
+        //   this.cut = tab;
+        // },
         countTime () {
           // 获取当前时间
           let date = new Date()
@@ -113,27 +148,15 @@
           if (leftTime >= 0) {
             // 天
             this.day = Math.floor(leftTime / 1000 / 60 / 60 / 24)
-            // 时
-            let h = Math.floor(leftTime / 1000 / 60 / 60 % 24)
-            this.hour = h < 10 ? '0' + h : h
-            // 分
-            let m = Math.floor(leftTime / 1000 / 60 % 60)
-            this.min = m < 10 ? '0' + m : m
-            // 秒
-            let s = Math.floor(leftTime / 1000 % 60)
-            this.second = s < 10 ? '0' + s : s
           } else {
             this.day = 0
-            this.hour = '00'
-            this.min = '00'
-            this.second = '00'
           }
           // 等于0的时候不调用
-          if (Number(this.hour) === 0 && Number(this.day) === 0 && Number(this.min) === 0 && Number(this.second) === 0) {
+          if (Number(this.day) === 0 ) {
             return
           } else {
             // 递归每秒调用countTime方法，显示动态时间效果,
-            setTimeout(this.countTime, 1000)
+            this.timer = setTimeout(this.countTime, 1000)
           }
         },
       }
@@ -141,6 +164,9 @@
 </script>
 
 <style lang="scss" scoped>
+.filter-container{
+  position: relative;
+}
 .tab_Moda{
   height: 48px;
   cursor: pointer;
@@ -161,9 +187,23 @@
   color: #021E8C;
 }
 .isActive{
-  border-bottom: 2px solid #021E8C;
+  border-bottom: 3px solid #021E8C;
   color: #021E8C;
   background: none;
-  margin-top: -1px;
+  margin-top: -1.1px;
+}
+.prompt{
+  position: absolute;
+  top:-1px;
+  right: 40px;
+}
+@media screen and (max-width: 1366px) {
+    .prompt span{
+      width: 50%;
+      float: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 }
 </style>

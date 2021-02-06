@@ -24,6 +24,7 @@
               :props="{ value: 'id' }"
               :options="orgList"
               :show-all-levels="false"
+              placeholder="单位部门"
               @change="orgFiled"
               v-model="summaryData.filed"
               clearable
@@ -59,6 +60,7 @@
           filed:[],
         },
         screenWidth: 0,
+        btnFlag:'',
         width: this.initWidth(),
         rules: {
         },
@@ -104,8 +106,9 @@
       setUser(org ,list,orgID) {
         this.orgList = list;
         if (org) {
-          this.summaryData = { ...org };
-          this.summaryData.filed = [org.company.key,org.departMent.key];
+          this.summaryData = JSON.parse(JSON.stringify(org));
+          this.$set(this.summaryData,'filed',[this.summaryData.company.key,this.summaryData.departMent.key])
+          this.btnFlag = org.departMent.key;
         }
         this.summaryData.orgId = orgID;
       },
@@ -116,6 +119,7 @@
         this.summaryData ={
           filed: []
         }
+        this.btnFlag = '';
         // 先清除校验，再清除表单，不然有奇怪的bug
         this.$refs.form.clearValidate();
         this.$refs.form.resetFields();
@@ -124,6 +128,13 @@
         let vm = this;
         this.$refs.form.validate((valid) => {
           if (valid) {
+            if(this.btnFlag == this.summaryData.departMent.key){
+              this.$message({
+                type:'warning',
+                message:'不能向本单位部门调整，请选择其他部门'
+              })
+              return false;
+            }
             vm.editSubmit();
           } else {
             return false;

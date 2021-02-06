@@ -38,7 +38,7 @@
               style="width: 92%"
               :multiple="false"
               clearable
-              placeholder="请输入关键词"
+              placeholder="请选择职务级别"
               v-model="summaryData.post.key"
             >
               <el-option
@@ -67,7 +67,7 @@
         <el-col :sm="12" :xs="24">
           <!--性别 -->
           <el-form-item label="性别:" prop="sex.code">
-            <el-select style="width: 92%" clearable v-model="summaryData.sex.code" placeholder="请选择">
+            <el-select style="width: 92%" clearable v-model="summaryData.sex.code" placeholder="请选择性别">
               <el-option
                 v-for="item in genderData"
                 :key="item.code"
@@ -94,7 +94,7 @@
         <el-col :sm="12" :xs="24">
           <!--人员类别 -->
           <el-form-item label="人员类别:" prop="personnelType">
-            <el-select style="width:92%"  placeholder="请输入人员类别" v-model="summaryData.personnelType.key" value>
+            <el-select style="width:92%"  placeholder="请选择人员类别" v-model="summaryData.personnelType.key" value>
               <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
             </el-select>
           </el-form-item>
@@ -130,7 +130,7 @@
         <el-col :sm="12" :xs="24">
           <!--婚否 -->
           <el-form-item label="婚否:" prop="marriage">
-            <el-select style="width: 92%" clearable v-model="summaryData.marriage" placeholder="请选择">
+            <el-select style="width: 92%" clearable v-model="summaryData.marriage" placeholder="请选择婚姻状况">
               <el-option
                 v-for="item in maritalData"
                 :key="item.value"
@@ -220,7 +220,7 @@
         </el-col>
         <el-col :sm="12" :xs="24">
           <!--检测类型 -->
-          <el-form-item label="检测类型:" prop="checkType">
+          <el-form-item label="检测类型:" prop="checkType.key">
             <el-select style="width:92%"  placeholder="请选择检测类型" clearable v-model="summaryData.checkType.key" value>
               <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.CHECK_TYPE" />
             </el-select>
@@ -422,6 +422,11 @@
             required: true,
             message: this.$t("rules.require"),
             trigger: "blur",
+          },
+          'checkType.key':{
+            required: true,
+            message: this.$t("rules.require"),
+            trigger: "change",
           }
         },
       };
@@ -478,11 +483,11 @@
       setUser(org ,list,orgID,dicts) {
         this.orgList = list;
         if (org) {
-          this.summaryData = { ...org };
+          this.summaryData = JSON.parse(JSON.stringify(org));
           this.summaryData.filed = [org.company.key,org.departMent.key];
           this.findStaByIds(this.summaryData.filed)
         }
-        this.dicts = { ...dicts };
+        this.dicts = JSON.parse(JSON.stringify(dicts));
         this.summaryData.orgId = orgID;
       },
       close() {

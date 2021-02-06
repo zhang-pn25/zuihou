@@ -13,13 +13,13 @@
       :rules="rules"
       class="taskStyle"
       label-position="right"
-      label-width="200px"
+      label-width="220px"
       ref="form"
     >
       <!-- <el-form-item label="序号:" prop="serialNumber">
         <el-input
           placeholder="请输入序号"
-          style="width: 85%"
+          style="width: 70%"
           v-input-limit='0'
           v-model="taskData.serialNumber"
           clearable
@@ -30,7 +30,7 @@
         <el-input
           placeholder="请输入任务名称"
           :disabled="type == 'edit'"
-          style="width: 85%"
+          style="width: 70%"
           v-model="taskData.taskName"
           clearable
         >
@@ -39,11 +39,11 @@
       <el-form-item label="人员信息上报截止时间:" prop="beforeDeadline">
         <el-date-picker
           v-model="taskData.beforeDeadline"
-          type="datetime"
+          type="date"
           placeholder="请选择人员信息上报截止时间"
           align="right"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          style="width: 85%"
+          value-format="yyyy-MM-dd"
+          style="width: 70%"
           :picker-options="pickerOptions"
         >
         </el-date-picker>
@@ -51,11 +51,11 @@
       <el-form-item label="检测开始时间:" prop="startTime">
         <el-date-picker
           v-model="taskData.startTime"
-          type="datetime"
+          type="date"
           placeholder="请选择检测开始时间"
           align="right"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          style="width: 85%"
+          value-format="yyyy-MM-dd"
+          style="width: 70%"
           :picker-options="pickerOptions"
         >
         </el-date-picker>
@@ -63,11 +63,11 @@
       <el-form-item label="检测结束时间:" prop="endTime">
         <el-date-picker
           v-model="taskData.endTime"
-          type="datetime"
+          type="date"
           placeholder="请选择检测结束时间"
           align="right"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          style="width: 85%"
+          value-format="yyyy-MM-dd"
+          style="width: 70%"
           :picker-options="pickerOptions"
         >
         </el-date-picker>
@@ -75,11 +75,11 @@
       <el-form-item label="检测结果上报截止时间:" prop="afterDeadline">
         <el-date-picker
           v-model="taskData.afterDeadline"
-          type="datetime"
-          value-format="yyyy-MM-dd HH:mm:ss"
+          type="date"
+          value-format="yyyy-MM-dd"
           placeholder="请选择检测结果上报截止时间"
           align="right"
-          style="width: 85%"
+          style="width: 70%"
           :picker-options="pickerOptions"
         >
         </el-date-picker>
@@ -88,8 +88,8 @@
         <el-input
           placeholder="请输入任务描述"
           type="textarea"
-          :rows="4"
-          style="width: 85%"
+          :rows="3"
+          style="width: 70%"
           v-model="taskData.describe"
           clearable
         ></el-input>

@@ -120,7 +120,7 @@
         prop="dateOfBirth"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.dateOfBirth }}</span>
+          <span>{{ scope.row.dateOfBirth | dateFilter }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -289,6 +289,19 @@
         prop="remarks"
       >
       </el-table-column>
+      <el-table-column
+        label="检测部门"
+        :show-overflow-tooltip="true"
+        align="center"
+        width="120"
+        prop="orgId"
+      >
+      <template slot-scope="scope">
+        <span>
+          {{scope.row.orgId.data?scope.row.orgId.data:''}}
+        </span>
+      </template>
+      </el-table-column>
     </el-table>
     <pagination
       :limit.sync="queryParams.size"
@@ -319,6 +332,7 @@
   import Treeselect from "@riophae/vue-treeselect";
   import "@riophae/vue-treeselect/dist/vue-treeselect.css";
   import orgApi from '@/api/Org.js'
+  import moment from 'moment'
   import afterPerInforApi from "@/api/afterPerInfor.js";
   import { initQueryParams,downloadFile ,getDictsKey,assignment} from '@/utils/commons';
   import Pagination from "@/components/Pagination";
@@ -336,7 +350,11 @@
         }else if (val == true) {
           return '是'
         }
-      }
+      },
+      dateFilter(val){
+        let date = moment(val).format('YYYY-MM-DD');
+        return date;
+      },
     },
     data(){
       return{
@@ -420,18 +438,19 @@
       },
       // 监听部门单位数据变化
       orgFiled(val){
-        this.queryParams.model.company.key = val.length>0?val[0]:'';
-        this.queryParams.model.departMent.key = val.length>0?val[1]:'';
         let data = "";
-        data = assignment(
-          this.getNode(
-            this.orgList,
-            "children",
-            this.queryParams.model.filed
-          ),
-          val
-        );
-        console.log(data);
+        if(val){
+          this.queryParams.model.company.key = val.length>0?val[0]:'';
+          this.queryParams.model.departMent.key = val.length>0?val[1]:'';
+          data = assignment(
+            this.getNode(
+              this.orgList,
+              "children",
+              this.queryParams.model.filed
+            ),
+            val
+          );
+        }
         this.queryParams.model.company.key = val ? data[0] : null;
         this.queryParams.model.departMent.key = val ? data[1] : null;
       },
@@ -461,7 +480,7 @@
           },
           "isDelete": true,
           "status": true,
-          filed:[],
+          filed:null,
         }
         this.search();
       },

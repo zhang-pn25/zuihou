@@ -105,7 +105,7 @@
         label="人员信息上报截止时间"
         :show-overflow-tooltip="true"
         align="center"
-        width="200"
+        width="180"
         prop="beforeDeadline"
       >
         <template slot-scope="scope">
@@ -116,7 +116,7 @@
         label="检测开始时间"
         :show-overflow-tooltip="true"
         align="center"
-        width="200"
+        width="180"
         prop="startTime"
       >
         <template slot-scope="scope">
@@ -127,7 +127,7 @@
         label="检测结束时间"
         :show-overflow-tooltip="true"
         align="center"
-        width="200"
+        width="180"
         prop="endTime"
       >
         <template slot-scope="scope">
@@ -138,7 +138,7 @@
         label="检测结果上报截止时间"
         :show-overflow-tooltip="true"
         align="center"
-        width="200"
+        width="180"
         prop="afterDeadline"
       >
         <template slot-scope="scope">
@@ -367,14 +367,19 @@
         const vm = this;
         taskApi.delete({ids:val}).then(response =>{
           const res = response.data;
-          if (res.isSuccess) {
+          if (res.data) {
             vm.$message({
               message: this.$t("tips.deleteSuccess"),
               type: "success"
             });
             vm.clearSelections();
+            vm.search();
+          }else {
+            vm.$message({
+              message: '有人员信息，不可删除',
+              type: "error"
+            });
           }
-          vm.search();
         });
       },
       search() {

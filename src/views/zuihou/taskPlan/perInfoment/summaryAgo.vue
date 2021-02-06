@@ -36,7 +36,7 @@
       />
     </el-select>
     <el-input placeholder='请输入姓名' class="filter-item search-item" v-model="queryParams.model.userName"/>
-    <el-select class="filter-item search-item" clearable placeholder="请输入人员类别" v-model="queryParams.model.personnelType.key" value>
+    <el-select class="filter-item search-item" clearable placeholder="请选择人员类别" v-model="queryParams.model.personnelType.key" value>
       <el-option :key="index" :label="item.name" :value="item.id" v-for="(item, key, index) in dicts.PERSONNEL_TYPE" />
     </el-select>
     <div style="display: inline" v-show = 'seniorType'>
@@ -179,7 +179,7 @@
       prop="dateOfBirth"
     >
       <template slot-scope="scope">
-        <span>{{ scope.row.dateOfBirth }}</span>
+        <span>{{ scope.row.dateOfBirth | dateFilter }}</span>
       </template>
     </el-table-column>
     <el-table-column
@@ -400,6 +400,12 @@
       name: "summaryAgo.vue",
       components:{Edit,Pagination,previewData,FileImport,Treeselect ,adjustEdit},
       directives: { elDragDialog },
+      filters:{
+        dateFilter(val){
+          let date = moment(val).format('YYYY-MM-DD');
+          return date;
+        },
+      },
       data(){
         return{
           tableKey: 0,
@@ -409,6 +415,7 @@
           },
           orgList:[],
           editType:false,
+          timerSetTimeOut:'',
           fileImport: {
             isVisible: false,
             type: "import",
@@ -475,13 +482,11 @@
         }
       },
       mounted() {
-        this.initOrg();
-        this.search();
+        this.setData();
         this.countTime();
-        getDictsKey(
-          ["PERSONNEL_TYPE",'CHECK_TYPE'],
-          this.dicts
-        );
+      },
+      beforeDestroy(){
+        clearTimeout(this.timerSetTimeOut)
       },
       watch:{
         'queryParams.model.filed':'orgFiled'
@@ -502,10 +507,11 @@
       },
       methods:{
         search(){
-            this.fetch();
+          this.fetch();
         },
         fetch(){
           let queryParam = this.disposeData();
+          queryParam.model.isMove = false;
           afterPerInforApi.afterPage(queryParam).then(response =>{
             let res = response.data;
             this.tableData = res.data;
@@ -697,7 +703,7 @@
           queryParam.page = 0;
           queryParam.size = 0;
           queryParam.map.fileName = "检测前人员信息汇总模板";
-          perInforApi.export(queryParam).then(response => {
+          perInforApi.stencilExport(queryParam).then(response => {
             downloadFile(response);
           });
         },
@@ -720,6 +726,14 @@
           });
           return this.treePath;
         },
+        setData(){
+          this.initOrg();
+          this.reset();
+          getDictsKey(
+            ["PERSONNEL_TYPE",'CHECK_TYPE'],
+            this.dicts
+          );
+        },
         countTime () {
           // 获取当前时间
           let date = new Date()
@@ -729,14 +743,14 @@
           // 时间差
           let leftTime = end - now;
           // 等于0的时候不调用
-          if (leftTime < 0) {
+          if (leftTime <= 0) {
             if (this.user.code == 'SECONDARY_USER'){
               this.editType = true;
             }
             return false;
           } else {
             // 递归每秒调用countTime方法
-            setTimeout(this.countTime, 1000)
+            this.timerSetTimeOut = setTimeout(this.countTime, 1000)
           }
         },
       }

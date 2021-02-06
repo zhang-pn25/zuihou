@@ -144,20 +144,20 @@ export default {
           vm.successNum += 1;
         } else {
           setTimeout(() => {
-            vm.$message({
-              message: file.name + "上传失败，原因：<br/>" + file.response.msg,
-              type: "error",
-              dangerouslyUseHTMLString: true,
-              showClose: true,
-              duration: 10000,
-              onClose: (msgs)=>{
-                copy(msgs['message']);
-                vm.$message({
-                  message: "复制错误消息成功",
-                  type: "success",
-                });
-              }
-            });
+            // vm.$message({
+            //   message: file.name + "上传失败，原因：<br/>" + file.response.msg,
+            //   type: "error",
+            //   dangerouslyUseHTMLString: true,
+            //   showClose: true,
+            //   duration: 10000,
+            //   onClose: (msgs)=>{
+            //     copy(msgs['message']);
+            //     vm.$message({
+            //       message: "复制错误消息成功",
+            //       type: "success",
+            //     });
+            //   }
+            // });
           }, 0);
           vm.isUploadError = false;
           vm.errorNum += 1;

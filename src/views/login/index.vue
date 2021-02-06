@@ -536,9 +536,10 @@
   .login-container {
     .el-input {
       display: inline-block;
-      /deep/ .el-input--prefix{
-        background: #FFF !important;
-      }
+      background: #FFF !important;
+      /*/deep/ .el-input--prefix{*/
+      /*  background: #FFF !important;*/
+      /*}*/
       .el-input__icon{
         color: #031C54;
       }
@@ -559,6 +560,7 @@
     }
 
     .el-form-item {
+      height: 42px;
       border: 1px solid #91B2DD;
       border-radius: 2px;
       color: #454545;

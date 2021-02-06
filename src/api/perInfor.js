@@ -5,6 +5,10 @@ const apiList = {
     method:'POST',
     url:`/nucleic/afterPersonnel/exportExcelReWrite`
   },
+  stencilExport:{
+    method:'POST',
+    url:`/nucleic/beforPersonnel/exportExcelReWrite`
+  },
   beforeImport:{
     method:'POST',
     url:`/nucleic/beforPersonnel/import`
@@ -54,6 +58,13 @@ export default {
   export(data){
     return axiosApi({
       ...apiList.export,
+      responseType: "blob",
+      data
+    })
+  },
+  stencilExport(data){
+    return axiosApi({
+      ...apiList.stencilExport,
       responseType: "blob",
       data
     })
