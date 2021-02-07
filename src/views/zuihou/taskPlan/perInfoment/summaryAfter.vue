@@ -766,6 +766,7 @@
         list.company.data = {};
         list.departMent.data = {};
         list.post.data = {};
+        list.orgId.data = {};
         afterPerInforApi.afterUpdatePersonnel(list).then((response) => {
           const res = response.data;
           if (res.isSuccess) {

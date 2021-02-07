@@ -588,6 +588,9 @@
     background-size: cover;
     width: 100%;
     height: 100vh;
+    >>> input:-webkit-autofill{
+      box-shadow: 0 0 0 1000px #FFF inset !important;
+    }
     .btn_login{
       margin-top: 25px;
       border-radius: 10px;

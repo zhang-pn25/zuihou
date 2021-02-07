@@ -637,7 +637,7 @@
           } else {
             this.$message({
               type:'error',
-              message:'数据不完整'
+              message:'数据不完整，请检查数据是否有必输项'
             })
             return false;
           }

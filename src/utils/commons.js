@@ -103,13 +103,22 @@ export const downloadFile = (response) => {
     if ((fileName.startsWith("'") || fileName.startsWith('"')) && (fileName.endsWith("'") || fileName.endsWith('"'))) {
       fileName = fileName.substring(1, fileName.length - 1)
     }
-
-    let blob = new Blob([res]);
-    let link = document.createElement("a");
-    link.href = window.URL.createObjectURL(blob);
-    link.download = fileName;
-    link.click();
-    window.URL.revokeObjectURL(link.href);
+    if (
+        !!window.ActiveXObject ||
+        "ActiveXObject" in window ||
+        navigator.userAgent.indexOf("Edge") > -1
+      ) {
+        let blob = new Blob([res], { type: "application/vnd.ms-excel" });
+        navigator.msSaveBlob(blob, fileName);
+    } else{
+      let blob = new Blob([res]);
+      let link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = fileName;
+      link.click();
+      window.URL.revokeObjectURL(link.href);
+    }
+   
   }
 }
 

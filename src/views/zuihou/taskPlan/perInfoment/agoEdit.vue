@@ -311,7 +311,10 @@
         ],
         summaryData: {
           filed:[],
-          orgId:'',
+          orgId:{
+            key:'',
+            data:{}
+          },
           status: 1,
           company:{
             key:'',
@@ -336,7 +339,6 @@
           },
           isDelete: 0,
         },
-        filed:[],
         stationList:[],
         dicts:{
           PERSONNEL_TYPE:{},
@@ -345,7 +347,7 @@
         screenWidth: 0,
         width: this.initWidth(),
         rules: {
-          filed:{
+          'filed':{
             required: true,
             message: this.$t("rules.require"),
             trigger: "change",
@@ -353,7 +355,7 @@
           'post.key':[{
             required: true,
             message: this.$t("rules.require"),
-            trigger: "blur",
+            trigger: "change",
           },
             {
               validator: (rule, value, callback) => {
@@ -484,11 +486,11 @@
         this.orgList = list;
         if (org) {
           this.summaryData = JSON.parse(JSON.stringify(org));
-          this.summaryData.filed = [org.company.key,org.departMent.key];
+          this.$set(this.summaryData,'filed',[org.company.key,org.departMent.key])
           this.findStaByIds(this.summaryData.filed)
         }
         this.dicts = JSON.parse(JSON.stringify(dicts));
-        this.summaryData.orgId = orgID;
+        this.summaryData.orgId.key = orgID;
       },
       close() {
         this.$emit("close");
@@ -496,7 +498,10 @@
       reset() {
         this.summaryData ={
           filed:[],
-          orgId:'',
+          orgId:{
+            key:'',
+            data:{}
+          },
           status: 1,
           company:{
             key:'',
@@ -567,6 +572,7 @@
         list.company.data = {};
         list.departMent.data = {};
         list.post.data = {};
+        list.orgId.data = {};
         perInforApi.updatePersonnel(list).then((response) => {
           const res = response.data;
           if (res.isSuccess) {

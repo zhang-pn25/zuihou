@@ -168,6 +168,7 @@
             class="el-icon-edit table-operation"
             style="color: #021E8C;"
             title="修改"
+            :class="newDate > row.endTime ?'errClassStatus':'susClassStatus'"
             v-has-permission="['task:update']"
           />
           <i
@@ -212,6 +213,7 @@
   import taskApi from "@/api/task.js";
   import {initQueryParams} from '@/utils/commons'
   import Edit from "./Edit";
+  import moment from 'moment'
 
   export default {
     name: "LoginLog",
@@ -247,6 +249,7 @@
           icon:'el-icon-search',
           text:'高级搜索'
         },
+        newDate:moment(new Date()).format('YYYY-MM-DD'),
         seniorType:false,
         tableKey: 0,
         loading: false,
@@ -312,6 +315,9 @@
         return data;
       },
       edit(row){
+        if(this.newDate > row.endTime){
+          return false;
+        }
         this.$refs.edit.setUser(row,this.user.orgId);
         this.dialog.type = "edit";
         this.dialog.isVisible = true;
@@ -419,5 +425,11 @@
       color: #5A5E66;
       margin: 0px 0px 5px 4px;
     }
+  }
+  .susClassStatus {
+    cursor: pointer;
+  }
+  .errClassStatus {
+    cursor: not-allowed;
   }
 </style>

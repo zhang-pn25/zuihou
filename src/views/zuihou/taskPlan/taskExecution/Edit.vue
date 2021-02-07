@@ -161,6 +161,10 @@ export default {
         checkAddress: "",
         status: 1,
         isDelete: 0,
+        orgId:{
+          key:'',
+          data:{}
+        }
       },
       screenWidth: 0,
       width: this.initWidth(),
@@ -310,8 +314,7 @@ export default {
       if (org) {
         this.taskData = { ...org };
       }
-      console.log(this.taskData);
-      this.taskData.orgId = val;
+      this.taskData.orgId.key = val;
     },
     close() {
       this.$emit("close");
@@ -328,6 +331,10 @@ export default {
         checkAddress: "",
         status: 1,
         isDelete: 0,
+        orgId:{
+          key:'',
+          data:{}
+        }
       };
       // 先清除校验，再清除表单，不然有奇怪的bug
       this.$refs.form.clearValidate();
@@ -354,7 +361,6 @@ export default {
     },
     save() {
       const vm = this;
-      console.log(this.taskData);
       taskApi.save(this.taskData).then((response) => {
         const res = response.data;
         console.log(res.data);

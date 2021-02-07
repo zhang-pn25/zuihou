@@ -103,21 +103,20 @@
           return "800px";
         }
       },
-      setUser(org ,list,orgID) {
+      setUser(org ,list) {
         this.orgList = list;
         if (org) {
           this.summaryData = JSON.parse(JSON.stringify(org));
           this.$set(this.summaryData,'filed',[this.summaryData.company.key,this.summaryData.departMent.key])
           this.btnFlag = org.departMent.key;
         }
-        this.summaryData.orgId = orgID;
       },
       close() {
         this.$emit("close");
       },
       reset() {
         this.summaryData ={
-          filed: []
+          filed: [],
         }
         this.btnFlag = '';
         // 先清除校验，再清除表单，不然有奇怪的bug
@@ -152,6 +151,7 @@
         data.company.data = {};
         data.departMent.data = {};
         data.post.data = {};
+        data.orgId.data = {};
         data.tableId = data.id;
         perInforApi.updateAndSave(data).then((response) => {
           const res = response.data;

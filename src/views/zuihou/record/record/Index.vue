@@ -511,6 +511,7 @@
         queryParam.size = -1;
         queryParam.map.fileName = '检测后人员信息汇总'
         afterPerInforApi.export(queryParam).then(response => {
+          console.log(response);
           downloadFile(response);
         });
       },
