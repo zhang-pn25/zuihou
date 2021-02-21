@@ -109,7 +109,7 @@
         prop="sex"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.sex.desc?scope.row.sex.desc:'' }}</span>
+          <span>{{ scope.row.sex?scope.row.sex.desc:'' }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -151,14 +151,14 @@
       >
       </el-table-column>
       <el-table-column
-        label="婚否"
+        label="婚姻状况"
         :show-overflow-tooltip="true"
         align="center"
         width="80"
         prop="marriage"
       >
         <template slot-scope="{row}">
-          <span>{{row.marriage?'是':'否'}}</span>
+          <span>{{row.marriage?'已婚':'未婚'}}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -224,7 +224,7 @@
         label="检测时间"
         :show-overflow-tooltip="true"
         align="center"
-        width="120"
+        width="150"
         prop="checkTime"
       >
       </el-table-column>
@@ -252,9 +252,7 @@
         prop="isAbnormal"
       >
         <template slot-scope="{row}">
-          <span>
-            {{ row.isAbnormal | isAbnormalFilter }}
-          </span>
+          <span>{{ row.isAbnormal?row.isAbnormal.desc:'' }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -345,10 +343,12 @@
       isAbnormalFilter(val){
         if (val == null || val == undefined){
           return ''
-        }else if(val == false){
+        }else if(val == 'F'){
           return '否'
-        }else if (val == true) {
+        }else if (val == 'T') {
           return '是'
+        }else if (val == 'N')  {
+          return '未知'
         }
       },
       dateFilter(val){

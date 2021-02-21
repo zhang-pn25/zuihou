@@ -168,7 +168,7 @@
       prop="sex"
     >
       <template slot-scope="scope">
-        <span>{{ scope.row.sex.desc?scope.row.sex.desc:'' }}</span>
+        <span>{{ scope.row.sex?scope.row.sex.desc:'' }}</span>
       </template>
     </el-table-column>
     <el-table-column
@@ -210,14 +210,14 @@
     >
     </el-table-column>
     <el-table-column
-      label="婚否"
+      label="婚姻状况"
       :show-overflow-tooltip="true"
       align="center"
       width="80"
       prop="marriage"
     >
       <template slot-scope="{row}">
-        <span>{{row.marriage?'是':'否'}}</span>
+        <span>{{row.marriage?'已婚':'未婚'}}</span>
       </template>
     </el-table-column>
     <el-table-column

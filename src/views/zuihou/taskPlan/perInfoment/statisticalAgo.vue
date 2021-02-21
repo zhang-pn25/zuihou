@@ -34,9 +34,11 @@
      <el-table-column
         label="序号"
         align="center"
-        type='index'
         width="70"
       >
+       <template slot-scope="scope">
+         <span>{{scope.row.seriNumber == '总计'? '总计': scope.$index + 1}}</span>
+       </template>
       </el-table-column>
       <el-table-column
         label="单位"
@@ -46,7 +48,7 @@
         prop="company"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.company.data?scope.row.company.data.label:'' }}</span>
+          <span>{{ scope.row.company?scope.row.company.data.label:'' }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -84,7 +86,7 @@
           prop="sjzb"
         >
           <template slot-scope="scope">
-            <span>{{ scope.row.sjzb?scope.row.sjzb:'' }}</span>
+            <span>{{ scope.row.sjzb }}</span>
           </template>
         </el-table-column>
         <el-table-column
@@ -204,6 +206,34 @@
         data.roleCode = this.user.code,
         afterPerInforApi.afterStatisticalPage(data).then(response =>{
           let res = response.data;
+          let obj ={
+            dwfj:0,
+            dwls:0,
+            dwsubtotal:0,
+            dwzb:0,
+            dwzt:0,
+            sjfj:0,
+            sjls:0,
+            sjsubtotal:0,
+            sjzb:0,
+            sjzt:0,
+            total:0,
+            seriNumber:'总计',
+          }
+          for (let item of res.data){
+            obj.dwfj = Number(item.dwfj)  + Number(obj.dwfj);
+            obj.dwls = Number(item.dwls) + Number(obj.dwls);
+            obj.dwsubtotal = Number(item.dwsubtotal) + Number(obj.dwsubtotal);
+            obj.dwzb = Number(item.dwzb) + Number(obj.dwzb);
+            obj.dwzt = Number(item.dwzt) + Number(obj.dwzt);
+            obj.sjfj = Number(item.sjfj) + Number(obj.sjfj);
+            obj.sjls = Number(item.sjls) + Number(obj.sjls);
+            obj.sjsubtotal = Number(item.sjsubtotal) + Number(obj.sjsubtotal);
+            obj.sjzb = Number(item.sjzb) + Number(obj.sjzb);
+            obj.sjzt = Number(item.sjzt) + Number(obj.sjzt);
+            obj.total = Number(item.total) + Number(obj.total);
+          }
+          res.data.push(obj);
           this.tableData = res.data;
         })
       },

@@ -25,16 +25,26 @@
         v-for="item in stationList"
       />
     </el-select>
+<!--    <el-date-picker-->
+<!--      v-model="queryParams.model.checkTime"-->
+<!--      type="date"-->
+<!--      placeholder="请选择检测时间"-->
+<!--      align="right"-->
+<!--      class="filter-item search-item"-->
+<!--      value-format="yyyy-MM-dd"-->
+<!--    >-->
+<!--    </el-date-picker>-->
+      <!-- <div class="titText">检测开始时间</div> -->
     <el-date-picker
       v-model="queryParams.model.checkTime"
-      type="date"
-      placeholder="请选择检测时间"
-      align="right"
-      class="filter-item search-item"
-      value-format="yyyy-MM-dd"
-    >
+      type="datetimerange"
+      range-separator="至"
+      class="filter-item search-item date-range-item"
+      start-placeholder="检测时间起"
+      value-format="yyyy-MM-dd HH:mm:ss"
+      end-placeholder="检测时间止">
     </el-date-picker>
-    <el-select class="filter-item search-item" clearable v-model="queryParams.model.isAbnormal" placeholder="请选择检测是否异常">
+    <el-select class="filter-item search-item" clearable v-model="queryParams.model.isAbnormal.code" placeholder="请选择检测是否异常">
       <el-option
         v-for="item in isAbnormalList"
         :key="item.value"
@@ -177,7 +187,7 @@
         prop="sex"
       >
         <template slot-scope="scope">
-          <span>{{ scope.row.sex.desc?scope.row.sex.desc:'' }}</span>
+          <span>{{ scope.row.sex?scope.row.sex.desc:'' }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -219,14 +229,14 @@
       >
       </el-table-column>
       <el-table-column
-        label="婚否"
+        label="婚姻状况"
         :show-overflow-tooltip="true"
         align="center"
         width="80"
         prop="marriage"
       >
         <template slot-scope="{row}">
-          <span>{{row.marriage?'是':'否'}}</span>
+          <span>{{row.marriage?'已婚':'未婚'}}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -299,50 +309,32 @@
       <el-table-column
         label="检测时间"
         align="center"
-        width="170"
+        width="220"
         prop="checkTime"
       >
         <template slot-scope="{row}">
           <el-date-picker
             v-model="row.checkTime"
-            type="date"
+            type="datetime"
             placeholder="检测时间"
             align="right"
             @change ='update(row,1)'
             style="width: 100%"
-            value-format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd HH:mm:ss"
           >
           </el-date-picker>
         </template>
       </el-table-column>
       <el-table-column
         label="检测结果"
-        :show-overflow-tooltip="true"
         align="center"
         width="150"
         prop="checkResult"
       >
         <template slot-scope="scope">
-          <el-input
-            placeholder="检测结果"
-            @change ='update(scope.row,2)'
-            style="width: 100%"
-            v-model="scope.row.checkResult"
-          >
-          </el-input>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="是否异常"
-        :show-overflow-tooltip="true"
-        align="center"
-        width="140"
-        prop="isAbnormal"
-      >
-        <template slot-scope="{row}">
-          <el-select style="width: 100%" @change ='update(row,3)' v-model="row.isAbnormal" placeholder="是否异常">
+          <el-select style="width: 100%"  @change ='update(scope.row,2)' v-model="scope.row.checkResult" placeholder="检测结果">
             <el-option
-              v-for="item in isAbnormalList"
+              v-for="item in checkResoutList"
               :key="item.value"
               :label="item.label"
               :value="item.value">
@@ -351,8 +343,17 @@
         </template>
       </el-table-column>
       <el-table-column
+        label="是否异常"
+        align="center"
+        width="140"
+        prop="isAbnormal"
+      >
+        <template slot-scope="{row}">
+          <span>{{ row.isAbnormal?row.isAbnormal.desc:'' }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column
         label="检测途径"
-        :show-overflow-tooltip="true"
         align="center"
         width="180"
         prop="checkChannel"
@@ -371,7 +372,6 @@
       </el-table-column>
       <el-table-column
         label="未检测原因"
-        :show-overflow-tooltip="true"
         align="center"
         width="180"
         prop="notDetectedReason"
@@ -495,10 +495,12 @@
       isAbnormalFilter(val){
         if (val == null || val == undefined){
           return ''
-        }else if(val == false){
+        }else if(val == 'F'){
           return '否'
-        }else if (val == true) {
+        }else if (val == 'T') {
           return '是'
+        }else if (val == 'N')  {
+          return '未知'
         }
       },
       dateFilter(val){
@@ -515,8 +517,14 @@
         },
         orgList:[],
         isAbnormalList:[
-          {value:false,label:'否'},
-          {value:true,label:'是'},
+          {value:'F',label:'否'},
+          {value:'T',label:'是'},
+          {value:'N',label:'未知'},
+        ],
+        checkResoutList:[
+          {value:'阴性',label:'阴性'},
+          {value:'阳性',label:'阳性'},
+          {value:'未检测',label:'未检测'},
         ],
         queryParams:initQueryParams({
           model:{
@@ -540,6 +548,10 @@
             "post": {
               "data": "",
               "key": ''
+            },
+            isAbnormal: {
+              "code": "",
+              "desc": ""
             },
             "sex": {
               "code": "",
@@ -682,6 +694,10 @@
             "code": "",
             "desc": ""
           },
+          "isAbnormal": {
+            "code": "",
+            "desc": ""
+          },
           "status": true,
           filed:null,
         }
@@ -707,6 +723,10 @@
         if (!data.model.post.key) delete data.model.post;
         if (!data.model.checkType.key) delete data.model.checkType;
         if (!data.model.sex.code) delete data.model.sex;
+        if (!data.model.isAbnormal.code) delete data.model.isAbnormal;
+        data.model.checkTimeStart = data.model.checkTime?data.model.checkTime[0]:'';
+        data.model.checkTimeEnd = data.model.checkTime?data.model.checkTime[1]:'';
+        delete data.model.checkTime;
         return data;
       },
       // 导出excel
@@ -760,6 +780,24 @@
             })
             row.checkTime = '';
             return false;
+          }
+        }
+        if (val == 2){
+          if (row.checkResult == '阴性'){
+            row.isAbnormal ={
+              desc:'否',
+              code:'F',
+            }
+          }else if (row.checkResult == '阳性'){
+            row.isAbnormal ={
+              desc:'是',
+              code:'T',
+            }
+          }else if (row.checkResult == '未检测'){
+            row.isAbnormal ={
+              desc:'未知',
+              code:'N',
+            }
           }
         }
         let list = JSON.parse(JSON.stringify(row))
@@ -832,5 +870,8 @@
   >>> .el-form-item{
     margin-bottom: 0px;
   }
+  }
+  .date-range-item {
+    width: 415px;
   }
 </style>

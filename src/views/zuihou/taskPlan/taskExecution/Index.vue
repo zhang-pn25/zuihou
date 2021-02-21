@@ -11,11 +11,11 @@
           <!-- <div class="titText">人员信息上报截止时间</div> -->
           <el-date-picker
             v-model="queryParams.model.beforeDeadline"
-            type="daterange"
+            type="datetimerange"
             range-separator="至"
             class="filter-item search-item date-range-item"
             start-placeholder="人员信息上报截止时间起"
-            value-format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd HH:mm:ss"
             end-placeholder="人员信息上报截止时间止">
           </el-date-picker>
         </div>
@@ -23,11 +23,11 @@
           <!-- <div class="titText">检测开始时间</div> -->
           <el-date-picker
             v-model="queryParams.model.startTime"
-            type="daterange"
+            type="datetimerange"
             range-separator="至"
             class="filter-item search-item date-range-item"
             start-placeholder="检测开始时间起"
-            value-format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd HH:mm:ss"
             end-placeholder="检测开始时间止">
           </el-date-picker>
         </div>
@@ -35,11 +35,11 @@
           <!-- <div class="titText">检测结束时间</div> -->
           <el-date-picker
             v-model="queryParams.model.endTime"
-            type="daterange"
+            type="datetimerange"
             range-separator="至"
             class="filter-item search-item date-range-item"
             start-placeholder="检测结束时间起"
-            value-format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd HH:mm:ss"
             end-placeholder="检测结束时间止">
           </el-date-picker>
         </div>
@@ -47,9 +47,9 @@
           <!-- <div class="titText">检测结果上报截止时间</div> -->
           <el-date-picker
             v-model="queryParams.model.afterDeadline"
-            type="daterange"
+            type="datetimerange"
             range-separator="至"
-            value-format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd HH:mm:ss"
             class="filter-item search-item date-range-item"
             start-placeholder="检测结果上报截止时间起"
             end-placeholder="检测结果上报截止时间止">
@@ -221,35 +221,13 @@
     filters: {},
     data() {
       return {
-        pickerOptions: {
-          shortcuts: [{
-            text: '今天',
-            onClick(picker) {
-              picker.$emit('pick', new Date());
-            }
-          }, {
-            text: '昨天',
-            onClick(picker) {
-              const date = new Date();
-              date.setTime(date.getTime() - 3600 * 1000 * 24);
-              picker.$emit('pick', date);
-            }
-          }, {
-            text: '一周前',
-            onClick(picker) {
-              const date = new Date();
-              date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
-              picker.$emit('pick', date);
-            }
-          }]
-        },
         queryParams: initQueryParams(),
         selection: [],
         seniorSearch:{
           icon:'el-icon-search',
           text:'高级搜索'
         },
-        newDate:moment(new Date()).format('YYYY-MM-DD'),
+        newDate:moment(new Date()).format('YYYY-MM-DD HH:mm:ss'),
         seniorType:false,
         tableKey: 0,
         loading: false,

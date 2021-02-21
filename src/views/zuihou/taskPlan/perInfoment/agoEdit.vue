@@ -128,8 +128,8 @@
       </el-row>
       <el-row>
         <el-col :sm="12" :xs="24">
-          <!--婚否 -->
-          <el-form-item label="婚否:" prop="marriage">
+          <!--婚姻状况 -->
+          <el-form-item label="婚姻状况:" prop="marriage">
             <el-select style="width: 92%" clearable v-model="summaryData.marriage" placeholder="请选择婚姻状况">
               <el-option
                 v-for="item in maritalData"
@@ -306,8 +306,8 @@
           {code:'W',label:'女'},
         ],
         maritalData:[
-          {value:true,label:'是'},
-          {value:false,label:'否'},
+          {value:true,label:'已婚'},
+          {value:false,label:'未婚'},
         ],
         summaryData: {
           filed:[],
@@ -443,6 +443,9 @@
           this.reset();
         },
       },
+      user() {
+        return this.$store.state.account.user;
+      },
       title() {
         return this.type === "add" ? "添加人员信息" : "修改人员信息";
       },
@@ -488,9 +491,10 @@
           this.summaryData = JSON.parse(JSON.stringify(org));
           this.$set(this.summaryData,'filed',[org.company.key,org.departMent.key])
           this.findStaByIds(this.summaryData.filed)
+        }else{
+          this.summaryData.orgId.key = orgID;
         }
         this.dicts = JSON.parse(JSON.stringify(dicts));
-        this.summaryData.orgId.key = orgID;
       },
       close() {
         this.$emit("close");
@@ -534,6 +538,7 @@
       },
       submitForm() {
         let vm = this;
+        console.log(this.summaryData);
         this.$refs.form.validate((valid) => {
           if (valid) {
             vm.editSubmit();

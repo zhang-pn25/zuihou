@@ -226,14 +226,14 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="婚否"
+        label="婚姻状况"
         :show-overflow-tooltip="true"
         align="center"
         width="80"
         prop="marriage"
       >
         <template slot-scope="{row}">
-          <el-select style="width: 100%" @change="updateRow(scope.row)" v-model="row.marriage" placeholder="婚否">
+          <el-select style="width: 100%" @change="updateRow(scope.row)" v-model="row.marriage" placeholder="婚姻状况">
             <el-option
               v-for="item in maritalData"
               :key="item.value"
@@ -461,8 +461,8 @@
            size:'-1'
         }),
         maritalData:[
-          {value:true,label:'是'},
-          {value:false,label:'否'},
+          {value:true,label:'已婚'},
+          {value:false,label:'未婚'},
         ],
         tableKey: 0,
         loading: false,
@@ -632,7 +632,7 @@
                 })
                 return false;
               }
-            } 
+            }
             vm.editSubmit();
           } else {
             this.$message({

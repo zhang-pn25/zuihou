@@ -39,10 +39,10 @@
       <el-form-item label="人员信息上报截止时间:" prop="beforeDeadline">
         <el-date-picker
           v-model="taskData.beforeDeadline"
-          type="date"
+          type="datetime"
           placeholder="请选择人员信息上报截止时间"
           align="right"
-          value-format="yyyy-MM-dd"
+          value-format="yyyy-MM-dd HH:mm:ss"
           style="width: 70%"
           :picker-options="pickerOptions"
         >
@@ -51,10 +51,10 @@
       <el-form-item label="检测开始时间:" prop="startTime">
         <el-date-picker
           v-model="taskData.startTime"
-          type="date"
+          type="datetime"
           placeholder="请选择检测开始时间"
           align="right"
-          value-format="yyyy-MM-dd"
+          value-format="yyyy-MM-dd HH:mm:ss"
           style="width: 70%"
           :picker-options="pickerOptions"
         >
@@ -63,10 +63,10 @@
       <el-form-item label="检测结束时间:" prop="endTime">
         <el-date-picker
           v-model="taskData.endTime"
-          type="date"
+          type="datetime"
           placeholder="请选择检测结束时间"
           align="right"
-          value-format="yyyy-MM-dd"
+          value-format="yyyy-MM-dd HH:mm:ss"
           style="width: 70%"
           :picker-options="pickerOptions"
         >
@@ -75,8 +75,8 @@
       <el-form-item label="检测结果上报截止时间:" prop="afterDeadline">
         <el-date-picker
           v-model="taskData.afterDeadline"
-          type="date"
-          value-format="yyyy-MM-dd"
+          type="datetime"
+          value-format="yyyy-MM-dd HH:mm:ss"
           placeholder="请选择检测结果上报截止时间"
           align="right"
           style="width: 70%"
