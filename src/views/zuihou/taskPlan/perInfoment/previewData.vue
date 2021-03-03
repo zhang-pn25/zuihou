@@ -665,7 +665,7 @@
         // data.accountingTestTaskId = this.$route.query.id;
         // if (vm.type === "add") {
         //   vm.save(data);
-        // } else { 
+        // } else {  
         //   vm.update(data);
         // }
       },
