@@ -352,22 +352,22 @@
             message: this.$t("rules.require"),
             trigger: "change",
           },
-          'post.key':[{
-            required: true,
-            message: this.$t("rules.require"),
-            trigger: "change",
-          },
-            {
-              validator: (rule, value, callback) => {
-                  if (this.summaryData.filed.length == 0) {
-                    callback("请先选择单位部门");
-                  } else {
-                    callback();
-                  }
-              },
-              trigger: "blur",
-            },
-          ],
+          // 'post.key':[{
+          //   required: true,
+          //   message: this.$t("rules.require"),
+          //   trigger: "change",
+          // },
+          //   {
+          //     validator: (rule, value, callback) => {
+          //         if (this.summaryData.filed.length == 0) {
+          //           callback("请先选择单位部门");
+          //         } else {
+          //           callback();
+          //         }
+          //     },
+          //     trigger: "blur",
+          //   },
+          // ],
           userName:{
             required: true,
             message: this.$t("rules.require"),

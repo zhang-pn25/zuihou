@@ -472,7 +472,7 @@
         rules: {
           // serialNumber: { required: true,message: '不能为空',trigger: "blur", },
           filed:{ required: true,message: '不能为空',trigger: "change" },
-          post:{ required: true,message: '不能为空',trigger: "change"},
+          // post:{ required: true,message: '不能为空',trigger: "change"},
           userName:{ required: true,message: '不能为空',trigger: "blur" },
           sex:{ required: true,message: '不能为空',trigger: "change" },
           checkType:{ required: true,message: '不能为空',trigger: "change" },
@@ -514,6 +514,9 @@
       title() {
         return "预览";
       },
+      user() {
+        return this.$store.state.account.user;
+      },
     },
     mounted() {
       window.onresize = () => {
@@ -545,6 +548,8 @@
           for (let item of data.records){
             item.filed = [item.company?item.company.key:'',item.departMent?item.departMent.key:''];
             item.stationList = [{id:item.post.key,name:item.post.data}];
+            // item.org = this.user.orgId;
+            // item.task = this.$route.query.id;
             item.checkTypeBtn = false;
            }
           this.form.tableData = data.records;
@@ -644,6 +649,7 @@
         });
       },
       editSubmit() {
+        // {org:this.user.orgId,task:this.$route.query.id}
         perInforApi.determineSaveBach().then(response =>{
             let res = response.data;
             if (res.data){

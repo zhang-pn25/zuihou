@@ -41,7 +41,10 @@
       </el-row>
       <div class="prompt">
           <div style="float: right;">
-            <span style="font-size: 14px;margin-top: 13px;display: block">距离<label style="color: red;font-size:18px">{{this.$route.query.taskName}}</label>任务的检测结果上报截止时间还有<label style="color: red;font-size:18px">{{day}}</label>天，请尽快上传</span>
+            <el-tooltip placement="top" effect="dark">
+              <div slot="content">距离{{this.$route.query.taskName}}任务的检测结果上报截止时间还有{{day}}天，请尽快上传</div>
+              <span style="font-size: 14px;margin-top: 13px;display: block">距离<label style="color: red;font-size:18px">{{this.$route.query.taskName}}</label>任务的检测结果上报截止时间还有<label style="color: red;font-size:18px">{{day}}</label>天，请尽快上传</span>
+            </el-tooltip>
           </div>
 <!--            <div v-else>-->
 <!--              <el-button  class="filter-item" style="margin-bottom: 5px" plain type="danger" v-has-permission="['user:add']">重新激活</el-button>-->
@@ -86,6 +89,7 @@
           },
           btnType:false,
           timer:'',
+          taskName:this.$route.query.taskName,
           curStartTime: '',
           day: '0',
           hour: '00',
@@ -110,10 +114,10 @@
           return this.$store.state.account.user;
         },
       },
-      mounted() {
-        this.$setCookie('org',this.user.orgId);
-        this.$setCookie('task',this.$route.query.id);
-      },
+      // mounted() {
+      //   this.$setCookie('org',this.user.orgId);
+      //   this.$setCookie('task',this.$route.query.id);
+      // },
       methods:{
         handleClick(tab, event) {
           switch (tab.index) {

@@ -389,7 +389,7 @@
   import orgApi from '@/api/Org.js'
   import moment from 'moment'
   import perInforApi from "@/api/perInfor.js";
-  import FileImport from "@/components/zuihou/Import"
+  import FileImport from "@/components/fileUpload/Import"
   import { initQueryParams,downloadFile ,getDictsKey ,assignment} from '@/utils/commons';
   import Pagination from "@/components/Pagination";
   import stationApi from "@/api/Station.js";
@@ -419,7 +419,7 @@
           fileImport: {
             isVisible: false,
             type: "import",
-            action: `${process.env.VUE_APP_BASE_API}/nucleic/beforPersonnel/import`,
+            action: `${process.env.VUE_APP_BASE_API}/nucleic/beforPersonnel/importt`,
           },
           queryParams:initQueryParams({
               model:{
